@@ -147,68 +147,81 @@ const CombinedComponent = ({ onDrop }) => {
   };
 
   const handleHint = () => {
-    // Define a function to calculate the priority of moving a card
-    const calculateCardPriority = (card, stackIndex) => {
-      // Higher priority for cards closer to the end of the stack
-      const priority = stackIndex / tableau.length;
-  
-      // Check if the card can be moved to any foundation stack
-      const targetSuit = Object.keys(foundation).find(suit => foundation[suit].length < 13 && isValidMove(card, foundation[suit]));
-      if (targetSuit) {
-        // Higher priority for cards that can be moved to an empty foundation
-        const emptyFoundation = foundation[targetSuit].length === 0 ? 1 : 0;
-        return priority + emptyFoundation;
-      }
-      
-      // Lower priority for cards that can't be moved anywhere
-      return priority - 1;
-    };
-  
-    // Find the card with the highest priority
-    let highestPriority = -Infinity;
-    let bestMove = null;
-  
+    // Iterate over each card in the tableau
     for (let stackIndex = 0; stackIndex < tableau.length; stackIndex++) {
       const stack = tableau[stackIndex];
       for (let cardIndex = 0; cardIndex < stack.length; cardIndex++) {
         const card = stack[cardIndex];
-        const priority = calculateCardPriority(card, stackIndex);
-        if (priority > highestPriority) {
-          highestPriority = priority;
-          bestMove = { card, from: stackIndex };
+        // Check if the card can be moved to any other stack or to the foundation
+        if (canMoveCard(card, stackIndex, cardIndex)) {
+          // Execute the move
+          executeMove(stackIndex, cardIndex);
+          return; // Exit the function after providing a hint
         }
       }
     }
+    console.log("No hint available.");
+  };
   
-    // If a suitable move is found, execute it
-    if (bestMove) {
-      const { card, from } = bestMove;
-      const targetSuit = Object.keys(foundation).find(suit => foundation[suit].length < 13 && isValidMove(card, foundation[suit]));
-      if (targetSuit) {
-        // Move the card to the foundation
-        const updatedTableau = [...tableau];
-        updatedTableau[from] = tableau[from].filter((_, index) => index !== tableau[from].length - 1);
-        setTableau(updatedTableau);
-        setFoundation({
-          ...foundation,
-          [targetSuit]: [...foundation[targetSuit], card]
-        });
+  // Function to check if a card can be moved to any other stack or to the foundation
+  const canMoveCard = (card, stackIndex, cardIndex) => {
+    // Check if the card can be moved to the foundation
+    const targetSuit = Object.keys(foundation).find(suit => isValidMove(card, foundation[suit]));
+    if (targetSuit) {
+      return true;
+    }
+    // Check if the card can be moved to any other tableau stack
+    for (let targetStackIndex = 0; targetStackIndex < tableau.length; targetStackIndex++) {
+      if (targetStackIndex !== stackIndex) {
+        if (isValidMove(card, tableau[targetStackIndex])) {
+          return true;
+        }
       }
-    } else {
-      console.log("No hint available.");
+    }
+    return false;
+  };
+  
+  // Function to execute the move suggested by the hint
+  const executeMove = (fromStackIndex, fromCardIndex) => {
+    const card = tableau[fromStackIndex][fromCardIndex];
+    // Check if the card can be moved to the foundation
+    const targetSuit = Object.keys(foundation).find(suit => isValidMove(card, foundation[suit]));
+    if (targetSuit) {
+      // Move the card to the foundation
+      const updatedTableau = [...tableau];
+      updatedTableau[fromStackIndex] = tableau[fromStackIndex].filter((_, index) => index !== fromCardIndex);
+      setTableau(updatedTableau);
+      setFoundation({
+        ...foundation,
+        [targetSuit]: [...foundation[targetSuit], card]
+      });
+      return;
+    }
+    // Check if the card can be moved to any other tableau stack
+    for (let targetStackIndex = 0; targetStackIndex < tableau.length; targetStackIndex++) {
+      if (targetStackIndex !== fromStackIndex) {
+        if (isValidMove(card, tableau[targetStackIndex])) {
+          // Move the card to the target tableau stack
+          const updatedTableau = [...tableau];
+          updatedTableau[fromStackIndex] = tableau[fromStackIndex].filter((_, index) => index !== fromCardIndex);
+          updatedTableau[targetStackIndex] = [...tableau[targetStackIndex], card];
+          setTableau(updatedTableau);
+          return;
+        }
+      }
     }
   };
-    
+      
 
   return (
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       <div className='pt-[10px] flex flex-col items-center'>
         <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[100px] h-[150px]" src={GoogleImage} alt="Google Image"/>
-        <p onClick={handleClick} className='w-auto text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>CLICK</p>
-        <div className='flex flex-wrap'>
-        <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2'>Reset</button>
+        <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>CLICK</p>
+        <div className='flex flex-col justify-center items-center'>
+        <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
         <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
-        <button onClick={handleHint} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Hint</button>
+        {/* <button onClick={handleHint} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Hint</button> */}
         </div>
       </div>
       <div className='flex gap-5 justify-center pt-[10px]'>
