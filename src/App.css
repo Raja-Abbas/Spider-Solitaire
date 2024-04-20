@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.hinted {
+    border: 2px dashed yellow; /* Change color or style as desired */
+  }
+  

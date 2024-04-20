@@ -26,7 +26,7 @@ const App = () => {
       <DraggableItem onDrop={handleDrop} />
       <Timer/>
       <div  className='shadow-2xl absolute p-3 bg-black rounded-lg bottom-10 right-5 flex flex-col gap-2'>
-        <img className='shadow-2xl w-[130px] h-[250px]' src={Image1} alt="Image"/>
+        <img className='hover:w-[200px] hover:h-[270px] transition-all shadow-2xl w-[130px] h-[200px]' src={Image1} alt="Image"/>
       </div>
     </div>
   );

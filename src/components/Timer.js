@@ -57,12 +57,8 @@ function MyTimer({ expiryTimestamp }) {
             <button className='hover:underline transition-all text-[20px] italic mb-10 text-orange-500' onClick={pause}>Pause</button>
             <button className='hover:underline transition-all text-[20px] italic mb-10 text-orange-500' onClick={resume}>Resume</button>
           </div>
-          <div className='flex justify-between'>
-            <div className='hover:bg-gray-600 transition-all hover:p-2 cursor-pointer'>
-            <img className='w-10 h-auto' src={Undo1} alt='Undo Action'/>
-            <p>Undo</p>
-            </div>
-            <div className='hover:bg-gray-600 transition-all hover:p-2 cursor-pointer'>
+          <div className='flex justify-center'>
+            <div className='cursor-pointer'>
             <img className='w-10 h-auto' src={Star} alt='Star Image'/>
             <p>Stars</p>
             </div>
