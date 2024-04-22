@@ -37,7 +37,7 @@ const CombinedComponent = ({ onDrop }) => {
 
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
-      const cardsCount = index + 1 <= maxDealCount ? index + 1 : maxDealCount; // Ensure max 6 cards for each stack
+      const cardsCount = 6; // Ensure max 6 cards for each stack
       const cards = Array.from({ length: cardsCount }, (_, i) => ({
         image: i === cardsCount - 1 ? spadesCards[Math.floor(Math.random() * spadesCards.length)] : CardBack,
         isVisible: false
@@ -136,15 +136,53 @@ const CombinedComponent = ({ onDrop }) => {
   };
 
   const handleUndo = () => {
-    if (movesHistory.length > 0) {
-      const lastMove = movesHistory[movesHistory.length - 1];
-      const updatedTableau = [...tableau];
-      const cardToMove = updatedTableau[lastMove.to].pop();
-      updatedTableau[lastMove.from].push(cardToMove);
-      setMovesHistory(movesHistory.slice(0, -1));
-      setTableau(updatedTableau);
+    // Check if there are any moves in the history
+    if (movesHistory.length === 0) {
+      console.log("No moves to undo.");
+      return;
     }
+  
+    // Get the last move from the history
+    const lastMove = movesHistory[movesHistory.length - 1];
+    const fromStackIndex = lastMove.to;
+    const toStackIndex = lastMove.from;
+  
+    // Check if the source stack index is valid
+    if (fromStackIndex < 0 || fromStackIndex >= tableau.length) {
+      console.log("Invalid source stack index:", fromStackIndex);
+      return;
+    }
+  
+    // Check if the target stack index is valid
+    if (toStackIndex < 0 || toStackIndex >= tableau.length) {
+      console.log("Invalid target stack index:", toStackIndex);
+      return;
+    }
+  
+    // Check if the source stack is not empty
+    if (tableau[fromStackIndex].length === 0) {
+      console.log("Source stack is empty.");
+      return;
+    }
+  
+    // Retrieve the card to be moved back
+    const cardToMove = tableau[fromStackIndex][tableau[fromStackIndex].length - 1];
+  
+    // Move the card back to the original stack
+    const updatedTableau = tableau.map((stack, index) => {
+      if (index === fromStackIndex) {
+        return stack.slice(0, -1); // Remove the last card from the stack
+      } else if (index === toStackIndex) {
+        return [...stack, cardToMove]; // Move the card back to the original stack
+      }
+      return stack;
+    });
+  
+    // Update the tableau state and move history
+    setTableau(updatedTableau);
+    setMovesHistory(movesHistory.slice(0, -1)); // Remove the last move from history
   };
+    
 
   const handleHint = () => {
     // Iterate over each card in the tableau
@@ -211,17 +249,86 @@ const CombinedComponent = ({ onDrop }) => {
       }
     }
   };
-      
 
+  // Function to handle the drop event for moving single card
+  const handleSingleCardDrop = (e, stackIndex, cardIndex) => {
+    handleDrop(e, stackIndex, cardIndex);
+  };
+
+  // Function to handle the drag start event for single card
+  const handleSingleCardDragStart = (e, stackIndex, cardIndex) => {
+    e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex }));
+  };
+
+  // Function to handle the drag start event for multiple cards
+  const handleMultipleCardDragStart = (e, stackIndex, cardIndex) => {
+    const selectedCards = tableau[stackIndex].slice(cardIndex);
+    e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex, selectedCards }));
+  };
+
+  // Function to handle the drop event for moving multiple cards
+  const handleMultipleCardDrop = (e, stackIndex, cardIndex) => {
+    e.preventDefault();
+    const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const targetStack = tableau[stackIndex];
+  
+    // Check if the move is valid for moving the selected cards to the target stack
+    if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
+      const updatedTableau = tableau.map((stack, i) => {
+        if (i === cardData.stackIndex) {
+          return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
+        } else if (i === stackIndex) {
+          return [...stack, ...cardData.selectedCards]; // Add selected cards to the target stack
+        }
+        return stack;
+      });
+  
+      // Update tableau state with the modified stacks
+      setTableau(updatedTableau);
+  
+      // Update moves history
+      setMovesHistory([...movesHistory, { from: cardData.stackIndex, to: stackIndex }]);
+  
+      // Check for win condition
+      checkForWin(updatedTableau);
+    } else {
+      console.log("Invalid move.");
+    }
+  };
+  
+
+  // Function to validate moving multiple cards
+  const isValidMultiCardMove = (selectedCards, targetStack) => {
+    if (selectedCards.length === 0) return false;
+
+    // Check if the last card in the selected sequence can be placed on top of the target stack
+    const topCard = targetStack[targetStack.length - 1];
+    const lastSelectedCard = selectedCards[selectedCards.length - 1];
+    const isMoveValid = isValidMove(lastSelectedCard, targetStack);
+
+    // If the move is valid, check if all other cards can be placed on top of the last card
+    if (isMoveValid) {
+      for (let i = selectedCards.length - 2; i >= 0; i--) {
+        if (!isValidMove(selectedCards[i], [...targetStack, lastSelectedCard])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return false;
+  };
+
+  // Update the JSX to handle the new drag and drop events
   return (
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       <div className='pt-[10px] flex flex-col items-center'>
         <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[100px] h-[150px]" src={GoogleImage} alt="Google Image"/>
-        <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>CLICK</p>
+        <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
         <div className='flex flex-col justify-center items-center'>
-        <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
-        <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
-        {/* <button onClick={handleHint} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Hint</button> */}
+          <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
+          <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
+          {/* <button onClick={handleHint} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Hint</button> */}
         </div>
       </div>
       <div className='flex gap-5 justify-center pt-[10px]'>
@@ -229,38 +336,24 @@ const CombinedComponent = ({ onDrop }) => {
           <div
             key={stackIndex}
             className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
-            onDrop={(e) => handleDrop(e, stackIndex)}
+            onDrop={(e) => handleSingleCardDrop(e, stackIndex)}
             onDragOver={(e) => e.preventDefault()}
           >
-            {stack.length > 0 ? (
-              stack.map((card, cardIndex) => (
-                <img
-                  key={cardIndex}
-                  src={card.isVisible ? card.image : CardBack}
-                  alt={`Tableau Card ${stackIndex}-${cardIndex}`}
-                  className='cursor-pointer w-[100px] h-[150px] absolute'
-                  draggable={card.isVisible && cardIndex === stack.length - 1}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    top: `${cardIndex * 28}px`,
-                  }}
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex }));
-                  }}
-                />
-              ))
-            ) : (
+            {stack.map((card, cardIndex) => (
               <img
-                src={CardBack}
-                alt={`Tableau Card Back ${stackIndex}`}
+                key={cardIndex}
+                src={card.isVisible ? card.image : CardBack}
+                alt={`Tableau Card ${stackIndex}-${cardIndex}`}
                 className='cursor-pointer w-[100px] h-[150px] absolute'
+                draggable={card.isVisible}
                 style={{
                   maxWidth: '100%',
                   maxHeight: '100%',
+                  top: `${cardIndex * 28}px`,
                 }}
+                onDragStart={(e) => handleSingleCardDragStart(e, stackIndex, cardIndex)}
               />
-            )}
+            ))}
           </div>
         ))}
       </div>
