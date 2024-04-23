@@ -22,7 +22,8 @@ const CombinedComponent = ({ onDrop }) => {
   const [foundation, setFoundation] = useState(Array(3).fill([])); // Foundation piles
   const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
- 
+  const [filledFoundations, setFilledFoundations] = useState(0); // State to track filled foundation piles
+
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 10;
 
@@ -33,7 +34,6 @@ const CombinedComponent = ({ onDrop }) => {
         image: i === cardsCount - 1 ? spadesCards[Math.floor(Math.random() * spadesCards.length)] : CardBack,
         isVisible: i === cardsCount - 1 
       }));
-      console.log(cards)
       return cards;
     });
     setTableau(initialTableau);
@@ -91,38 +91,37 @@ const CombinedComponent = ({ onDrop }) => {
   };
   
   const handleSingleCardDrop = (e, stackIndex) => {
-  e.preventDefault();
-  const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
-  const targetStack = tableau[stackIndex];
+    e.preventDefault();
+    const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const targetStack = tableau[stackIndex];
 
-  // Calculate the number of cards being moved
-  const numMovedCards = cardData.selectedCards.length;
+    // Calculate the number of cards being moved
+    const numMovedCards = cardData.selectedCards.length;
 
-  // Check if the move is valid for moving the selected cards to the target stack
-  if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
-    const updatedTableau = tableau.map((stack, i) => {
-      if (i === cardData.stackIndex) {
-        return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
-      } else if (i === stackIndex) {
-        return [...stack, ...cardData.selectedCards]; // Add selected cards to the target stack
-      }
-      return stack;
-    });
+    // Check if the move is valid for moving the selected cards to the target stack
+    if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
+      const updatedTableau = tableau.map((stack, i) => {
+        if (i === cardData.stackIndex) {
+          return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
+        } else if (i === stackIndex) {
+          return [...stack, ...cardData.selectedCards]; // Add selected cards to the target stack
+        }
+        return stack;
+      });
 
-    // Update tableau state with the modified stacks
-    setTableau(updatedTableau);
+      // Update tableau state with the modified stacks
+      setTableau(updatedTableau);
 
-    // Record the move before updating the tableau state
-    recordMove(tableau, updatedTableau);
+      // Record the move before updating the tableau state
+      recordMove(tableau, updatedTableau);
 
-    // Check for win condition
-    checkForWin(updatedTableau);
-  } else {
-    console.log("Invalid move.");
-  }
-};
+      // Check for win condition
+      checkForWin(updatedTableau);
+    } else {
+      console.log("Invalid move.");
+    }
+  };
 
-  
   const isValidMultiCardMove = (selectedCards, targetStack) => {
     if (selectedCards.length === 0) return false;
   
@@ -131,8 +130,7 @@ const CombinedComponent = ({ onDrop }) => {
   
     return bottomCardRank === topCardRank + 1;
   };
-        
-  
+
   const checkForWin = (tableau) => {
     // Check if all tableau stacks are empty
     const allStacksEmpty = tableau.every(stack => stack.length === 0);
@@ -152,7 +150,6 @@ const CombinedComponent = ({ onDrop }) => {
     setTableau(updatedTableau);
   };
 
-
   const handleClick = () => {
     if (dealCount < maxDealCount) {
       addCardToStacks();
@@ -163,147 +160,153 @@ const CombinedComponent = ({ onDrop }) => {
   };
 
   const handleReset = () => {
-  dealInitialCards();
-  setDealCount(0);
-  setMovesHistory([]);
-};
+    dealInitialCards();
+    setDealCount(0);
+    setMovesHistory([]);
+    setFilledFoundations(0); // Reset the filled foundation piles count
+  };
 
-const handleUndo = () => {
-  if (movesHistory.length > 0) {
-    const lastMove = movesHistory.pop(); // Remove the last move from the history
-    setTableau(lastMove.before); // Restore the tableau state to the state before the last move
-    setMovesHistory([...movesHistory]); // Update the moves history after removing the last move
-  } else {
-    console.log("No moves to undo.");
-  }
-};
+  const handleUndo = () => {
+    if (movesHistory.length > 0) {
+      const lastMove = movesHistory.pop(); // Remove the last move from the history
+      setTableau(lastMove.before); // Restore the tableau state to the state before the last move
+      setMovesHistory([...movesHistory]); // Update the moves history after removing the last move
+    } else {
+      console.log("No moves to undo.");
+    }
+  };
 
-const handleFoundationDrop = (e, pileIndex) => {
-  e.preventDefault();
-  const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
-  const targetPile = foundation[pileIndex];
+  const handleFoundationDrop = (e, pileIndex) => {
+    e.preventDefault();
+    const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
+    const targetPile = foundation[pileIndex];
 
-  // Check if the move is valid for moving the selected cards to the foundation pile
-  if (isValidFoundationMove(cardData.selectedCards, targetPile)) {
-    // Update the foundation pile with the moved cards
-    const updatedFoundation = [...foundation];
-    updatedFoundation[pileIndex] = [...targetPile, ...cardData.selectedCards];
-    setFoundation(updatedFoundation);
+    // Check if the move is valid for moving the selected cards to the foundation pile
+    if (isValidFoundationMove(cardData.selectedCards, targetPile)) {
+      // Update the foundation pile with the moved cards
+      const updatedFoundation = [...foundation];
+      updatedFoundation[pileIndex] = [...targetPile, ...cardData.selectedCards];
+      setFoundation(updatedFoundation);
 
-    // Remove the moved cards from the tableau
-    const updatedTableau = tableau.map((stack, i) => {
-      if (i === cardData.stackIndex) {
-        return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
-      }
-      return stack;
-    });
-    setTableau(updatedTableau);
+      // Remove the moved cards from the tableau
+      const updatedTableau = tableau.map((stack, i) => {
+        if (i === cardData.stackIndex) {
+          return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
+        }
+        return stack;
+      });
+      setTableau(updatedTableau);
 
-    // Record the move before updating the tableau state
-    recordMove(tableau, updatedTableau);
+      // Record the move before updating the tableau state
+      recordMove(tableau, updatedTableau);
 
-    // Check for win condition
-    checkForWin(updatedTableau);
-  } else {
-    console.log("Invalid move to foundation.");
-  }
-};
-
-const isValidFoundationMove = (selectedCards, targetPile) => {
-  if (selectedCards.length === 0) return false;
-
-  // Check if the target pile is empty and the first card is an Ace
-  if (targetPile.length === 0 && getRank(selectedCards[0].image) === 1) return true;
-
-  // Check if the target pile is not empty and the top card's rank is one less than the first card's rank
-  if (targetPile.length > 0 && getRank(targetPile[targetPile.length - 1].image) === getRank(selectedCards[0].image) - 1) return true;
-
-  return false;
-};
-const recordMove = (before, after) => {
-  // Check if the movesHistory array has reached the limit of 100 moves
-  if (movesHistory.length < 10) {
-    setMovesHistory([...movesHistory, { before, after }]);
-  } else {
-    console.log("Maximum moves limit reached.");
-  }
-};
-
-return (
-  <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
-    <div className='flex flex-col w-auto'>
-    <div className='pt-[10px] flex flex-col items-center w-auto'>
-      <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[100px] h-[150px]" src={GoogleImage} alt="Google Image"/>
-      <div className="text-md text-cyan-200 mt-2 font-semibold">Moves: {movesHistory.length}</div>
-      <div className="text-md text-cyan-200 mt-2 font-semibold">Deals Left: {maxDealCount - dealCount}</div>
-      <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
-      <div className='flex flex-col justify-center items-center'>
-        <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
-        <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
-      </div>
-    </div>
-     {/* Render foundation piles */}
-<div className='flex flex-col gap-3 justify-center pt-[10px]'>
-  {foundation.map((pile, pileIndex) => (
-    <div
-      key={pileIndex}
-      className='relative bg-gray-50 w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
-      onDrop={(e) => handleFoundationDrop(e, pileIndex)}
-      onDragOver={(e) => e.preventDefault()}
-    >
-      {pile.map((card, cardIndex) => (
-        <img
-          key={cardIndex}
-          src={card.image}
-          alt={`Foundation Card ${pileIndex}-${cardIndex}`}
-          className='cursor-pointer absolute top-50 bottom-50 left-50 '
-          style={{
-            maxWidth: '100%',
-            maxHeight: '100%',
-            zIndex: cardIndex, // Ensures cards are stacked on top of each other
-            transform: `translateY(-${cardIndex * 0}px)`, // Adjust this value as needed for proper stacking
-          }}
-          draggable={false}
-        />
-      ))}
-      <p className='text-cyan-600'>Foundation</p>
-    </div>
-  ))}
-</div>
-
-      </div>
-    <div className='flex flex-col'>
+      // Check for win condition
+      checkForWin(updatedTableau);
       
-      {/* Render tableau stacks */}
-      <div className='flex gap-5 justify-center pt-[10px]'>
-      {tableau.map((stack, stackIndex) => (
-        <div
-          key={stackIndex}
-          className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
-          onDrop={(e) => handleSingleCardDrop(e, stackIndex)}
-          onDragOver={(e) => e.preventDefault()}
-        >
-          {stack.map((card, cardIndex) => (
-            <img
-              key={cardIndex}
-              src={card.isVisible ? card.image : CardBack}
-              alt={`Tableau Card ${stackIndex}-${cardIndex}`}
-              className='cursor-pointer w-[100px] h-[150px] absolute'
-              draggable={card.isVisible}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                top: `${cardIndex * 28}px`,
-              }}
-              onDragStart={(e) => handleSingleCardDragStart(e, stackIndex, cardIndex)}
-            />
+      // Check if the foundation pile is fully filled
+      if (updatedFoundation[pileIndex].length === 13) {
+        setFilledFoundations(filledFoundations + 1); // Increment the filled foundation piles count
+      }
+    } else {
+      console.log("Invalid move to foundation.");
+    }
+  };
+
+  const isValidFoundationMove = (selectedCards, targetPile) => {
+    if (selectedCards.length === 0) return false;
+
+    // Check if the target pile is empty and the first card is an Ace
+    if (targetPile.length === 0 && getRank(selectedCards[0].image) === 1) return true;
+
+    // Check if the target pile is not empty and the top card's rank is one less than the first card's rank
+    if (targetPile.length > 0 && getRank(targetPile[targetPile.length - 1].image) === getRank(selectedCards[0].image) - 1) return true;
+
+    return false;
+  };
+
+  const recordMove = (before, after) => {
+    // Check if the movesHistory array has reached the limit of 100 moves
+    if (movesHistory.length < 10) {
+      setMovesHistory([...movesHistory, { before, after }]);
+    } else {
+      console.log("Maximum moves limit reached.");
+    }
+  };
+
+  return (
+    <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
+      <div className='flex flex-col w-auto'>
+        <div className='pt-[10px] flex flex-col items-center w-auto'>
+          <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[100px] h-[150px]" src={GoogleImage} alt="Google Image"/>
+          <div className="text-md text-cyan-200 mt-2 font-semibold">Moves: {movesHistory.length}</div>
+          <div className="text-md text-cyan-200 mt-2 font-semibold">Deals Left: {maxDealCount - dealCount}</div>
+          <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
+          <div className='flex flex-col justify-center items-center'>
+            <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
+            <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
+          </div>
+        </div>
+        {/* Render foundation piles */}
+        <div className='flex flex-col gap-3 items-center justify-center pt-[10px]'>
+          {foundation.map((pile, pileIndex) => (
+            <div
+              key={pileIndex}
+              className='relative bg-gray-50 w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              onDrop={(e) => handleFoundationDrop(e, pileIndex)}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              {pile.map((card, cardIndex) => (
+                <img
+                  key={cardIndex}
+                  src={card.image}
+                  alt={`Foundation Card ${pileIndex}-${cardIndex}`}
+                  className='cursor-pointer absolute top-50 bottom-50 left-50 '
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    zIndex: cardIndex, // Ensures cards are stacked on top of each other
+                    transform: `translateY(-${cardIndex * 0}px)`, // Adjust this value as needed for proper stacking
+                  }}
+                  draggable={false}
+                />
+              ))}
+              <p className='text-cyan-600'>Foundation</p>
+            </div>
           ))}
         </div>
-      ))}
+        <div className="text-md text-cyan-200 mt-2 font-semibold text-center">Foundation Filled: {filledFoundations}</div>
+      </div>
+      <div className='flex flex-col'>
+        {/* Render tableau stacks */}
+        <div className='flex gap-5 justify-center pt-[10px]'>
+          {tableau.map((stack, stackIndex) => (
+            <div
+              key={stackIndex}
+              className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              onDrop={(e) => handleSingleCardDrop(e, stackIndex)}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              {stack.map((card, cardIndex) => (
+                <img
+                  key={cardIndex}
+                  src={card.isVisible ? card.image : CardBack}
+                  alt={`Tableau Card ${stackIndex}-${cardIndex}`}
+                  className='cursor-pointer w-[100px] h-[150px] absolute'
+                  draggable={card.isVisible}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    top: `${cardIndex * 28}px`,
+                  }}
+                  onDragStart={(e) => handleSingleCardDragStart(e, stackIndex, cardIndex)}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default CombinedComponent;
