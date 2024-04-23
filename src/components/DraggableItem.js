@@ -230,7 +230,7 @@ return (
       </div>
     </div>
      {/* Render foundation piles */}
-     <div className='mt-[50px] flex flex-col gap-5 justify-center pt-[10px]'>
+     <div className='mt-[20px] flex flex-col gap-5 justify-center pt-[10px]'>
        {foundation.map((pile, pileIndex) => (
         <div
           key={pileIndex}
