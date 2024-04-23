@@ -22,9 +22,7 @@ const CombinedComponent = ({ onDrop }) => {
   const [foundation, setFoundation] = useState(Array(3).fill([])); // Foundation piles
   const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
-  const recordMove = (before, after) => {
-  setMovesHistory([...movesHistory, { before, after }]);
-};
+ 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 10;
 
@@ -222,12 +220,22 @@ const isValidFoundationMove = (selectedCards, targetPile) => {
 
   return false;
 };
+const recordMove = (before, after) => {
+  // Check if the movesHistory array has reached the limit of 100 moves
+  if (movesHistory.length < 10) {
+    setMovesHistory([...movesHistory, { before, after }]);
+  } else {
+    console.log("Maximum moves limit reached.");
+  }
+};
 
 return (
   <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
     <div className='flex flex-col w-auto'>
     <div className='pt-[10px] flex flex-col items-center w-auto'>
       <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[100px] h-[150px]" src={GoogleImage} alt="Google Image"/>
+      <div className="text-md text-cyan-200 mt-2 font-semibold">Moves: {movesHistory.length}</div>
+      <div className="text-md text-cyan-200 mt-2 font-semibold">Deals Left: {maxDealCount - dealCount}</div>
       <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
       <div className='flex flex-col justify-center items-center'>
         <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
@@ -235,11 +243,11 @@ return (
       </div>
     </div>
      {/* Render foundation piles */}
-<div className='mt-[20px] flex flex-col gap-5 justify-center pt-[10px]'>
+<div className='flex flex-col gap-3 justify-center pt-[10px]'>
   {foundation.map((pile, pileIndex) => (
     <div
       key={pileIndex}
-      className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+      className='relative bg-gray-50 w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
       onDrop={(e) => handleFoundationDrop(e, pileIndex)}
       onDragOver={(e) => e.preventDefault()}
     >
@@ -248,7 +256,7 @@ return (
           key={cardIndex}
           src={card.image}
           alt={`Foundation Card ${pileIndex}-${cardIndex}`}
-          className='cursor-pointer absolute top-0 left-50'
+          className='cursor-pointer absolute top-50 bottom-50 left-50 '
           style={{
             maxWidth: '100%',
             maxHeight: '100%',
@@ -258,6 +266,7 @@ return (
           draggable={false}
         />
       ))}
+      <p className='text-cyan-600'>Foundation</p>
     </div>
   ))}
 </div>
