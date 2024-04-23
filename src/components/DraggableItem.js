@@ -30,11 +30,12 @@ const CombinedComponent = ({ onDrop }) => {
 
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
-      const cardsCount = 6; // Ensure max 6 cards for each stack
+      const cardsCount = 5; // Ensure max 6 cards for each stack
       const cards = Array.from({ length: cardsCount }, (_, i) => ({
         image: i === cardsCount - 1 ? spadesCards[Math.floor(Math.random() * spadesCards.length)] : CardBack,
         isVisible: i === cardsCount - 1 
       }));
+      console.log(cards)
       return cards;
     });
     setTableau(initialTableau);
@@ -135,8 +136,12 @@ const CombinedComponent = ({ onDrop }) => {
         
   
   const checkForWin = (tableau) => {
-    console.log("Checking for win...");
-  };
+    // Check if all tableau stacks are empty
+    const allStacksEmpty = tableau.every(stack => stack.length === 0);
+    
+    // If all stacks are empty, it's a win
+    return allStacksEmpty;
+  };  
 
   const addCardToStacks = () => {
     const updatedTableau = tableau.map(stack => {
@@ -230,31 +235,33 @@ return (
       </div>
     </div>
      {/* Render foundation piles */}
-     <div className='mt-[20px] flex flex-col gap-5 justify-center pt-[10px]'>
-       {foundation.map((pile, pileIndex) => (
-        <div
-          key={pileIndex}
-          className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
-          onDrop={(e) => handleFoundationDrop(e, pileIndex)}
-          onDragOver={(e) => e.preventDefault()}
-        >
-          {pile.map((card, cardIndex) => (
-            <img
-              key={cardIndex}
-              src={card.image}
-              alt={`Foundation Card ${pileIndex}-${cardIndex}`}
-              className='cursor-pointer w-[100px] h-[150px] absolute'
-              draggable={false}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                top: `${cardIndex * 28}px`,
-              }}
-            />
-          ))}
-        </div>
+<div className='mt-[20px] flex flex-col gap-5 justify-center pt-[10px]'>
+  {foundation.map((pile, pileIndex) => (
+    <div
+      key={pileIndex}
+      className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+      onDrop={(e) => handleFoundationDrop(e, pileIndex)}
+      onDragOver={(e) => e.preventDefault()}
+    >
+      {pile.map((card, cardIndex) => (
+        <img
+          key={cardIndex}
+          src={card.image}
+          alt={`Foundation Card ${pileIndex}-${cardIndex}`}
+          className='cursor-pointer absolute top-0 left-50'
+          style={{
+            maxWidth: '100%',
+            maxHeight: '100%',
+            zIndex: cardIndex, // Ensures cards are stacked on top of each other
+            transform: `translateY(-${cardIndex * 0}px)`, // Adjust this value as needed for proper stacking
+          }}
+          draggable={false}
+        />
       ))}
-      </div>
+    </div>
+  ))}
+</div>
+
       </div>
     <div className='flex flex-col'>
       

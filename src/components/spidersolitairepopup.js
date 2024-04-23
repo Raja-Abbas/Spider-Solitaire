@@ -15,7 +15,7 @@ const SpiderSolitaireRulesPopup = ({ onClose }) => {
               <li>Move cards within the tableau to create descending sequences of cards of the same suit.</li>
               <li>Sequences can be moved as a unit if they are of the same suit.</li>
               <li>Any card or sequence can be moved to an empty column.</li>
-              <li>Deal new cards from the stock pile to the tableau when stuck, but it adds a time penalty.</li>
+              <li>Deal new cards from the stock pile to the tableau when stuck</li>
             </ul>
           </li>
           <li><strong>Winning:</strong> Fill all foundation piles with cards of the same suit, arranged from King to Ace.</li>
