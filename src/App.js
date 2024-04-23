@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import DraggableItem from './components/DraggableItem';
 import Timer from './components/Timer'
 import Image1 from './assets/Image2.png'
+import SpiderSolitaireRulesPopup from './components/spidersolitairepopup';
 
 import './index.css';
 
@@ -20,9 +21,14 @@ const App = () => {
 
   const handleDragOver = () => {
   };
+  const [showRulesPopup, setShowRulesPopup] = useState(true);
 
+  const handleCloseRulesPopup = () => {
+    setShowRulesPopup(false);
+  };
   return (
     <div className='max-xl:hidden xl:mx-auto bg-cyan-800 overflow-hidden	 border-black border relative w-[100%] flex justify-between h-screen px-2'>
+      {showRulesPopup && <SpiderSolitaireRulesPopup onClose={handleCloseRulesPopup} />}
       <DraggableItem onDrop={handleDrop} />
       <Timer/>
       <div  className='shadow-2xl absolute p-3 bg-black rounded-lg bottom-10 right-5 flex flex-col gap-2'>
