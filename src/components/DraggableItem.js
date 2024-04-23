@@ -21,7 +21,9 @@ const CombinedComponent = ({ onDrop }) => {
   const [tableau, setTableau] = useState(Array(7).fill([]));
   const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
-  
+  const recordMove = (before, after) => {
+  setMovesHistory([...movesHistory, { before, after }]);
+};
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 10;
 
@@ -93,33 +95,37 @@ const CombinedComponent = ({ onDrop }) => {
   };
   
   const handleSingleCardDrop = (e, stackIndex) => {
-    e.preventDefault();
-    const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
-    const targetStack = tableau[stackIndex];
-  
-    // Check if the move is valid for moving the selected cards to the target stack
-    if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
-      const updatedTableau = tableau.map((stack, i) => {
-        if (i === cardData.stackIndex) {
-          return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
-        } else if (i === stackIndex) {
-          return [...stack, ...cardData.selectedCards]; // Add selected cards to the target stack
-        }
-        return stack;
-      });
-  
-      // Update tableau state with the modified stacks
-      setTableau(updatedTableau);
-  
-      // Update moves history
-      setMovesHistory([...movesHistory, { from: cardData.stackIndex, to: stackIndex }]);
-  
-      // Check for win condition
-      checkForWin(updatedTableau);
-    } else {
-      console.log("Invalid move.");
-    }
-  };
+  e.preventDefault();
+  const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
+  const targetStack = tableau[stackIndex];
+
+  // Calculate the number of cards being moved
+  const numMovedCards = cardData.selectedCards.length;
+
+  // Check if the move is valid for moving the selected cards to the target stack
+  if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
+    const updatedTableau = tableau.map((stack, i) => {
+      if (i === cardData.stackIndex) {
+        return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
+      } else if (i === stackIndex) {
+        return [...stack, ...cardData.selectedCards]; // Add selected cards to the target stack
+      }
+      return stack;
+    });
+
+    // Update tableau state with the modified stacks
+    setTableau(updatedTableau);
+
+    // Record the move before updating the tableau state
+    recordMove(tableau, updatedTableau);
+
+    // Check for win condition
+    checkForWin(updatedTableau);
+  } else {
+    console.log("Invalid move.");
+  }
+};
+
   
   // Define the isValidMultiCardMove function
   const isValidMultiCardMove = (selectedCards, targetStack) => {
@@ -160,14 +166,22 @@ const CombinedComponent = ({ onDrop }) => {
   };
 
   const handleReset = () => {
-    // Implementation for handling reset
-    console.log("Handling reset...");
-  };
+  dealInitialCards();
+  setDealCount(0);
+  setMovesHistory([]);
+};
 
-  const handleUndo = () => {
-    // Implementation for handling undo
-    console.log("Handling undo...");
-  };
+const handleUndo = () => {
+  if (movesHistory.length > 0) {
+    const lastMove = movesHistory.pop(); // Remove the last move from the history
+    setTableau(lastMove.before); // Restore the tableau state to the state before the last move
+    setMovesHistory([...movesHistory]); // Update the moves history after removing the last move
+  } else {
+    console.log("No moves to undo.");
+  }
+};
+
+
 
   return (
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
