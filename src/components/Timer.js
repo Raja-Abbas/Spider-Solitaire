@@ -71,7 +71,7 @@ function MyTimer({ expiryTimestamp }) {
 
 export default function App() {
   const time = new Date();
-  time.setSeconds(time.getSeconds() + 600);
+  time.setSeconds(time.getSeconds() + 1200);
 
   return (
     <div>

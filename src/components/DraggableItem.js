@@ -18,256 +18,81 @@ import Spades12 from '../assets/Cards/Suit=Spades, Number=Queen.svg';
 import Spades13 from '../assets/Cards/Suit=Spades, Number=King.svg';
 
 const CombinedComponent = ({ onDrop }) => {
-  const [tableau, setTableau] = useState([
-    [], [], [], [], [], [], []
-  ]);
-
-  const [foundation, setFoundation] = useState({
-    Spades: [],
-    Hearts: [],
-    Diamonds: [],
-    Clubs: []
-  });
-
+  const [tableau, setTableau] = useState(Array(7).fill([]));
+  const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
-
+  
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 10;
-  const [dealCount, setDealCount] = useState(0);
 
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
       const cardsCount = 6; // Ensure max 6 cards for each stack
       const cards = Array.from({ length: cardsCount }, (_, i) => ({
         image: i === cardsCount - 1 ? spadesCards[Math.floor(Math.random() * spadesCards.length)] : CardBack,
-        isVisible: false
+        isVisible: i === cardsCount - 1 // Set visibility for last card to true
       }));
       return cards;
     });
     setTableau(initialTableau);
-    setTimeout(() => {
-      const updatedTableau = initialTableau.map(stack => {
-        return stack.map(card => ({
-          ...card,
-          isVisible: true
-        }));
-      });
-      setTableau(updatedTableau);
-    }, 1000); // 5000 milliseconds = 5 seconds
   };
-
-  const addCardToStacks = () => {
-    if (dealCount >= maxDealCount) return;
-    const updatedTableau = tableau.map(stack => {
-      if (stack.length < spadesCards.length) {
-        const randomIndex = Math.floor(Math.random() * spadesCards.length);
-        return [...stack, { image: spadesCards[randomIndex], isVisible: true }];
-      }
-      return stack;
-    });
-    setTableau(updatedTableau);
-    setDealCount(dealCount + 1);
-  };
-
+  
   useEffect(() => {
     dealInitialCards();
   }, []);
 
-  const handleRandomDistribution = () => {
-    addCardToStacks();
-  };
-
-  const handleDrop = (e, stackIndex, cardIndex) => {
-    e.preventDefault();
-    const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
-    const droppedCard = tableau[cardData.stackIndex][cardData.cardIndex];
-    const targetStack = tableau[stackIndex];
-
-    if (isValidMove(droppedCard, targetStack)) {
-      const updatedTableau = tableau.map((stack, i) => {
-        if (i === cardData.stackIndex) {
-          return stack.filter((_, index) => index !== cardData.cardIndex);
-        } else if (i === stackIndex) {
-          return [...stack, { ...droppedCard, isVisible: true }];
-        }
-        return stack;
-      });
-      setMovesHistory([...movesHistory, { from: cardData.stackIndex, to: stackIndex }]);
-      setTableau(updatedTableau);
-      onDrop();
-      checkForWin(updatedTableau);
-    } else {
-      console.log("Invalid move.");
-    }
-  };
-
-  const isValidMove = (card, stack) => {
-    if (stack.length === 0) return card.image === spadesCards[spadesCards.length - 1];
-    const topCard = stack[stack.length - 1];
-    const cardRankIndex = spadesCards.findIndex(c => c === card.image);
-    const topCardRankIndex = spadesCards.findIndex(c => c === topCard.image);
-    return cardRankIndex === topCardRankIndex - 1;
-  };
-
-  const checkForWin = (tableau) => {
-    const allStacksEmpty = tableau.every(stack => stack.length === 0);
-    if (allStacksEmpty && dealCount === maxDealCount) {
-      const spadesWin = foundation.Spades.length === 13;
-      const heartsWin = foundation.Hearts.length === 13;
-      const diamondsWin = foundation.Diamonds.length === 13;
-      const clubsWin = foundation.Clubs.length === 13;
-      if (spadesWin && heartsWin && diamondsWin && clubsWin) {
-        alert("Congratulations! You win!");
-      } else {
-        alert("Game over. You lose!");
+  // Function to check if a sequence of cards forms a valid descending sequence
+  const isDescending = (cards) => {
+    for (let i = 1; i < cards.length; i++) {
+      const currentRank = getRank(cards[i].image);
+      const previousRank = getRank(cards[i - 1].image);
+      if (currentRank !== previousRank - 1) {
+        return false;
       }
     }
+    return true;
   };
 
-  const handleClick = () => {
-    handleRandomDistribution();
-  };
+  // Function to get the rank of a card from its image filename
+  const getRank = (cardImage) => {
+    // Extract the filename from the card image path
+    const filename = cardImage.split('/').pop(); // Get the filename part after the last '/'
 
-  const handleReset = () => {
-    setTableau(Array(7).fill([]));
-    setDealCount(0);
-    setMovesHistory([]);
-    dealInitialCards();
-  };
-
-  const handleUndo = () => {
-    // Check if there are any moves in the history
-    if (movesHistory.length === 0) {
-      console.log("No moves to undo.");
-      return;
-    }
-  
-    // Get the last move from the history
-    const lastMove = movesHistory[movesHistory.length - 1];
-    const fromStackIndex = lastMove.to;
-    const toStackIndex = lastMove.from;
-  
-    // Check if the source stack index is valid
-    if (fromStackIndex < 0 || fromStackIndex >= tableau.length) {
-      console.log("Invalid source stack index:", fromStackIndex);
-      return;
-    }
-  
-    // Check if the target stack index is valid
-    if (toStackIndex < 0 || toStackIndex >= tableau.length) {
-      console.log("Invalid target stack index:", toStackIndex);
-      return;
-    }
-  
-    // Check if the source stack is not empty
-    if (tableau[fromStackIndex].length === 0) {
-      console.log("Source stack is empty.");
-      return;
-    }
-  
-    // Retrieve the card to be moved back
-    const cardToMove = tableau[fromStackIndex][tableau[fromStackIndex].length - 1];
-  
-    // Move the card back to the original stack
-    const updatedTableau = tableau.map((stack, index) => {
-      if (index === fromStackIndex) {
-        return stack.slice(0, -1); // Remove the last card from the stack
-      } else if (index === toStackIndex) {
-        return [...stack, cardToMove]; // Move the card back to the original stack
-      }
-      return stack;
-    });
-  
-    // Update the tableau state and move history
-    setTableau(updatedTableau);
-    setMovesHistory(movesHistory.slice(0, -1)); // Remove the last move from history
-  };
-    
-
-  const handleHint = () => {
-    // Iterate over each card in the tableau
-    for (let stackIndex = 0; stackIndex < tableau.length; stackIndex++) {
-      const stack = tableau[stackIndex];
-      for (let cardIndex = 0; cardIndex < stack.length; cardIndex++) {
-        const card = stack[cardIndex];
-        // Check if the card can be moved to any other stack or to the foundation
-        if (canMoveCard(card, stackIndex, cardIndex)) {
-          // Execute the move
-          executeMove(stackIndex, cardIndex);
-          return; // Exit the function after providing a hint
-        }
+    // Extract the rank from the filename
+    const rankMatch = filename.match(/Number=(\w+)/); // Match the rank part of the filename
+    if (rankMatch && rankMatch[1]) {
+      const rankStr = rankMatch[1]; // Extracted rank string
+      // Convert rank string to numerical value
+      switch (rankStr) {
+        case 'Ace':
+          return 1;
+        case 'Jack':
+          return 11;
+        case 'Queen':
+          return 12;
+        case 'King':
+          return 13;
+        default:
+          return parseInt(rankStr, 10); // Convert other ranks to integers
       }
     }
-    console.log("No hint available.");
-  };
-  
-  // Function to check if a card can be moved to any other stack or to the foundation
-  const canMoveCard = (card, stackIndex, cardIndex) => {
-    // Check if the card can be moved to the foundation
-    const targetSuit = Object.keys(foundation).find(suit => isValidMove(card, foundation[suit]));
-    if (targetSuit) {
-      return true;
-    }
-    // Check if the card can be moved to any other tableau stack
-    for (let targetStackIndex = 0; targetStackIndex < tableau.length; targetStackIndex++) {
-      if (targetStackIndex !== stackIndex) {
-        if (isValidMove(card, tableau[targetStackIndex])) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
-  
-  // Function to execute the move suggested by the hint
-  const executeMove = (fromStackIndex, fromCardIndex) => {
-    const card = tableau[fromStackIndex][fromCardIndex];
-    // Check if the card can be moved to the foundation
-    const targetSuit = Object.keys(foundation).find(suit => isValidMove(card, foundation[suit]));
-    if (targetSuit) {
-      // Move the card to the foundation
-      const updatedTableau = [...tableau];
-      updatedTableau[fromStackIndex] = tableau[fromStackIndex].filter((_, index) => index !== fromCardIndex);
-      setTableau(updatedTableau);
-      setFoundation({
-        ...foundation,
-        [targetSuit]: [...foundation[targetSuit], card]
-      });
-      return;
-    }
-    // Check if the card can be moved to any other tableau stack
-    for (let targetStackIndex = 0; targetStackIndex < tableau.length; targetStackIndex++) {
-      if (targetStackIndex !== fromStackIndex) {
-        if (isValidMove(card, tableau[targetStackIndex])) {
-          // Move the card to the target tableau stack
-          const updatedTableau = [...tableau];
-          updatedTableau[fromStackIndex] = tableau[fromStackIndex].filter((_, index) => index !== fromCardIndex);
-          updatedTableau[targetStackIndex] = [...tableau[targetStackIndex], card];
-          setTableau(updatedTableau);
-          return;
-        }
-      }
-    }
+    return 0; // Return 0 if rank extraction fails
   };
 
-  // Function to handle the drop event for moving single card
-  const handleSingleCardDrop = (e, stackIndex, cardIndex) => {
-    handleDrop(e, stackIndex, cardIndex);
-  };
-
-  // Function to handle the drag start event for single card
   const handleSingleCardDragStart = (e, stackIndex, cardIndex) => {
-    e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex }));
-  };
-
-  // Function to handle the drag start event for multiple cards
-  const handleMultipleCardDragStart = (e, stackIndex, cardIndex) => {
     const selectedCards = tableau[stackIndex].slice(cardIndex);
-    e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex, selectedCards }));
+    const isDescendingSequence = isDescending(selectedCards);
+  
+    // Check if the selected cards form a descending sequence
+    if (isDescendingSequence) {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex, selectedCards }));
+    } else {
+      console.log("Cannot drag cards that are not in descending order.");
+      e.preventDefault(); // Prevent dragging if the cards are not in descending order
+    }
   };
-
-  // Function to handle the drop event for moving multiple cards
-  const handleMultipleCardDrop = (e, stackIndex, cardIndex) => {
+  
+  const handleSingleCardDrop = (e, stackIndex) => {
     e.preventDefault();
     const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
     const targetStack = tableau[stackIndex];
@@ -296,30 +121,54 @@ const CombinedComponent = ({ onDrop }) => {
     }
   };
   
-
-  // Function to validate moving multiple cards
+  // Define the isValidMultiCardMove function
   const isValidMultiCardMove = (selectedCards, targetStack) => {
     if (selectedCards.length === 0) return false;
-
-    // Check if the last card in the selected sequence can be placed on top of the target stack
-    const topCard = targetStack[targetStack.length - 1];
-    const lastSelectedCard = selectedCards[selectedCards.length - 1];
-    const isMoveValid = isValidMove(lastSelectedCard, targetStack);
-
-    // If the move is valid, check if all other cards can be placed on top of the last card
-    if (isMoveValid) {
-      for (let i = selectedCards.length - 2; i >= 0; i--) {
-        if (!isValidMove(selectedCards[i], [...targetStack, lastSelectedCard])) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    return false;
+  
+    const bottomCardRank = getRank(targetStack[targetStack.length - 1].image);
+    const topCardRank = getRank(selectedCards[0].image);
+  
+    // Check if the rank of the bottom card of the target stack is one higher than the rank of the top card of the descending sorted stack
+    return bottomCardRank === topCardRank + 1;
+  };
+        
+  
+  const checkForWin = (tableau) => {
+    // Implementation for checking win condition
+    console.log("Checking for win...");
   };
 
-  // Update the JSX to handle the new drag and drop events
+  const addCardToStacks = () => {
+    const updatedTableau = tableau.map(stack => {
+      if (stack.length < spadesCards.length) {
+        const randomIndex = Math.floor(Math.random() * spadesCards.length);
+        return [...stack, { image: spadesCards[randomIndex], isVisible: true }];
+      }
+      return stack;
+    });
+    setTableau(updatedTableau);
+  };
+
+
+  const handleClick = () => {
+    if (dealCount < maxDealCount) {
+      addCardToStacks();
+      setDealCount(dealCount + 1);
+    } else {
+      console.log("You have reached the maximum deal count.");
+    }
+  };
+
+  const handleReset = () => {
+    // Implementation for handling reset
+    console.log("Handling reset...");
+  };
+
+  const handleUndo = () => {
+    // Implementation for handling undo
+    console.log("Handling undo...");
+  };
+
   return (
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       <div className='pt-[10px] flex flex-col items-center'>
@@ -328,7 +177,6 @@ const CombinedComponent = ({ onDrop }) => {
         <div className='flex flex-col justify-center items-center'>
           <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
           <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
-          {/* <button onClick={handleHint} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Hint</button> */}
         </div>
       </div>
       <div className='flex gap-5 justify-center pt-[10px]'>
