@@ -390,7 +390,7 @@ setTableau(initialTableau);
                   style={{
                     maxWidth: '100%',
                     maxHeight: '100%',
-                    top: `${cardIndex * 28}px`,
+                    top: `${cardIndex * 22}px`,
                   }}
                   onDragStart={(e) => handleSingleCardDragStart(e, stackIndex, cardIndex)}
                 />
