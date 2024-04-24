@@ -25,15 +25,18 @@ const CombinedComponent = ({ onDrop }) => {
   const [filledFoundations, setFilledFoundations] = useState(0); // State to track filled foundation piles
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
-  const maxDealCount = 10;
+  const maxDealCount = 15;
 
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
       const cardsCount = 5; // Ensure max 6 cards for each stack
-      const cards = Array.from({ length: cardsCount }, (_, i) => ({
-        image: i === cardsCount - 1 ? spadesCards[Math.floor(Math.random() * spadesCards.length)] : CardBack,
-        isVisible: i === cardsCount - 1 
-      }));
+      const cards = Array.from({ length: cardsCount }, (_, i) => {
+        const randomIndex = Math.floor(Math.random() * spadesCards.length);
+        return {
+          image: spadesCards[randomIndex],
+          isVisible: true, // Set isVisible to true for all cards
+        };
+      });
       return cards;
     });
     setTableau(initialTableau);
@@ -142,13 +145,23 @@ const CombinedComponent = ({ onDrop }) => {
   const addCardToStacks = () => {
     const updatedTableau = tableau.map(stack => {
       if (stack.length < spadesCards.length) {
-        const randomIndex = Math.floor(Math.random() * spadesCards.length);
+        let randomIndex = Math.floor(Math.random() * spadesCards.length);
+        
+        // Check if the stack already contains a king
+        const containsKing = stack.some(card => getRank(card.image) === 13);
+  
+        // If the stack already contains a king, generate a new random index until a non-king card is selected
+        while (containsKing && getRank(spadesCards[randomIndex]) === 13) {
+          randomIndex = Math.floor(Math.random() * spadesCards.length);
+        }
+  
         return [...stack, { image: spadesCards[randomIndex], isVisible: true }];
       }
       return stack;
     });
     setTableau(updatedTableau);
   };
+  
 
   const handleClick = () => {
     if (dealCount < maxDealCount) {
@@ -233,6 +246,57 @@ const CombinedComponent = ({ onDrop }) => {
     }
   };
 
+  const handleAutoMoveToFoundation = () => {
+    // Iterate over each tableau stack
+    tableau.forEach((stack, stackIndex) => {
+      // Check if the stack has at least 13 cards
+      if (stack.length >= 13) {
+        // Check if the top 13 cards form a descending sequence
+        if (isDescending(stack.slice(-13))) {
+          // Check if there is an empty foundation pile
+          const emptyPileIndex = foundation.findIndex(pile => pile.length === 0);
+          if (emptyPileIndex !== -1) {
+            // Move the top 13 cards to the empty foundation pile
+            const cardsToMove = stack.slice(-13);
+            const updatedFoundation = [...foundation];
+            updatedFoundation[emptyPileIndex] = [...cardsToMove];
+            setFoundation(updatedFoundation);
+
+            // Remove the moved cards from the tableau stack
+            const updatedTableau = [...tableau];
+            updatedTableau[stackIndex] = stack.slice(0, -13);
+            setTableau(updatedTableau);
+
+            // Record the move
+            recordMove(tableau, updatedTableau);
+
+            // Check for win condition
+            checkForWin(updatedTableau);
+            
+            // Check if the foundation pile is fully filled
+            if (updatedFoundation[emptyPileIndex].length === 13) {
+              setFilledFoundations(filledFoundations + 1); // Increment the filled foundation piles count
+            }
+          }
+        }
+      }
+    });
+  };
+
+  // Call this function whenever the tableau or foundation piles are updated
+  useEffect(() => {
+    handleAutoMoveToFoundation();
+  }, [tableau, foundation]);
+  useEffect(() => {
+    // Check if all foundation piles are filled
+    const allPilesFilled = foundation.every(pile => pile.length === 13);
+  
+    // If all piles are filled, display a win message
+    if (allPilesFilled) {
+      alert("Congratulations! You won the game!");
+    }
+  }, [foundation]);
+  
   return (
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       <div className='flex flex-col w-auto'>
