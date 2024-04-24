@@ -42,6 +42,7 @@ const CombinedComponent = ({ onDrop }) => {
           };
         });
       }
+      console.log(cards)
       return cards;
     });
 const shuffledCards = shuffleArray(spadesCards); // Shuffle the spadesCards array
