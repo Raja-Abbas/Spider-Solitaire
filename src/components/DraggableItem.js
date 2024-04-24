@@ -345,7 +345,7 @@ setTableau(initialTableau);
           {foundation.map((pile, pileIndex) => (
             <div
               key={pileIndex}
-              className='relative bg-gray-50 w-[90px] h-[120px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              className='relative bg-gray-50 w-[70px] h-[100px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
               onDrop={(e) => handleFoundationDrop(e, pileIndex)}
               onDragOver={(e) => e.preventDefault()}
             >
@@ -364,7 +364,7 @@ setTableau(initialTableau);
                   draggable={false}
                 />
               ))}
-              <p className='text-cyan-600 text-sm'>Foundation</p>
+              <p className='text-cyan-600 text-xs'>Foundation</p>
             </div>
           ))}
         </div>
