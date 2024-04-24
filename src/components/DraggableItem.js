@@ -18,29 +18,31 @@ import Spades12 from '../assets/Cards/Suit=Spades, Number=Queen.svg';
 import Spades13 from '../assets/Cards/Suit=Spades, Number=King.svg';
 
 const CombinedComponent = ({ onDrop }) => {
-  const [tableau, setTableau] = useState(Array(7).fill([]));
+  const [tableau, setTableau] = useState(Array(10).fill([]));
   const [foundation, setFoundation] = useState(Array(3).fill([])); // Foundation piles
   const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
   const [filledFoundations, setFilledFoundations] = useState(0); // State to track filled foundation piles
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
-  const maxDealCount = 15;
+  const maxDealCount = 5;
 
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
-      const cardsCount = 5; // Ensure max 6 cards for each stack
+      const cardsCount = 5; // Ensure max 5 cards for each stack
       const cards = Array.from({ length: cardsCount }, (_, i) => {
         const randomIndex = Math.floor(Math.random() * spadesCards.length);
+        const isVisible = i === cardsCount - 1; // Set isVisible to true only for the top card
         return {
-          image: spadesCards[randomIndex],
-          isVisible: true, // Set isVisible to true for all cards
+          image: isVisible ? spadesCards[randomIndex] : CardBack, // Use CardBack image for face-down cards
+          isVisible: isVisible,
         };
       });
       return cards;
     });
     setTableau(initialTableau);
   };
+  
   
   useEffect(() => {
     dealInitialCards();
@@ -97,33 +99,39 @@ const CombinedComponent = ({ onDrop }) => {
     e.preventDefault();
     const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
     const targetStack = tableau[stackIndex];
-
+  
     // Calculate the number of cards being moved
     const numMovedCards = cardData.selectedCards.length;
-
+  
     // Check if the move is valid for moving the selected cards to the target stack
     if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
       const updatedTableau = tableau.map((stack, i) => {
         if (i === cardData.stackIndex) {
           return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
         } else if (i === stackIndex) {
-          return [...stack, ...cardData.selectedCards]; // Add selected cards to the target stack
+          const visibleIndex = stack.findIndex(card => card.isVisible); // Find the index of the first visible card
+          const updatedStack = stack.map((card, index) => ({
+            ...card,
+            isVisible: index >= visibleIndex, // Set isVisible to true for cards starting from the first visible card
+          }));
+          return [...updatedStack, ...cardData.selectedCards]; // Add selected cards to the target stack
         }
         return stack;
       });
-
+  
       // Update tableau state with the modified stacks
       setTableau(updatedTableau);
-
+  
       // Record the move before updating the tableau state
       recordMove(tableau, updatedTableau);
-
+  
       // Check for win condition
       checkForWin(updatedTableau);
     } else {
       console.log("Invalid move.");
     }
   };
+  
 
   const isValidMultiCardMove = (selectedCards, targetStack) => {
     if (selectedCards.length === 0) return false;
@@ -301,13 +309,13 @@ const CombinedComponent = ({ onDrop }) => {
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       <div className='flex flex-col w-auto'>
         <div className='pt-[10px] flex flex-col items-center w-auto'>
-          <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[100px] h-[150px]" src={GoogleImage} alt="Google Image"/>
+          <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[70px] h-[100px]" src={GoogleImage} alt="Google Image"/>
           <div className="text-md text-cyan-200 mt-2 font-semibold">Moves: {movesHistory.length}</div>
           <div className="text-md text-cyan-200 mt-2 font-semibold">Deals Left: {maxDealCount - dealCount}</div>
-          <p onClick={handleClick} className='w-[100%] text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
+          <p onClick={handleClick} className='w-auto text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
           <div className='flex flex-col justify-center items-center'>
-            <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Reset</button>
-            <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2 mt-2'>Undo</button>
+            <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2'>Reset</button>
+            <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2'>Undo</button>
           </div>
         </div>
         {/* Render foundation piles */}
@@ -315,7 +323,7 @@ const CombinedComponent = ({ onDrop }) => {
           {foundation.map((pile, pileIndex) => (
             <div
               key={pileIndex}
-              className='relative bg-gray-50 w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              className='relative bg-gray-50 w-[90px] h-[120px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
               onDrop={(e) => handleFoundationDrop(e, pileIndex)}
               onDragOver={(e) => e.preventDefault()}
             >
@@ -334,11 +342,11 @@ const CombinedComponent = ({ onDrop }) => {
                   draggable={false}
                 />
               ))}
-              <p className='text-cyan-600'>Foundation</p>
+              <p className='text-cyan-600 text-sm'>Foundation</p>
             </div>
           ))}
         </div>
-        <div className="text-md text-cyan-200 mt-2 font-semibold text-center">Foundation Filled: {filledFoundations}</div>
+        <div className="text-sm text-cyan-200 mt-2 font-semibold text-center">Foundation Filled: {filledFoundations}</div>
       </div>
       <div className='flex flex-col'>
         {/* Render tableau stacks */}
@@ -346,7 +354,7 @@ const CombinedComponent = ({ onDrop }) => {
           {tableau.map((stack, stackIndex) => (
             <div
               key={stackIndex}
-              className='relative w-[120px] h-[150px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              className='relative w-[80px] h-[100px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
               onDrop={(e) => handleSingleCardDrop(e, stackIndex)}
               onDragOver={(e) => e.preventDefault()}
             >
