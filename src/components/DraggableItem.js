@@ -19,29 +19,49 @@ import Spades13 from '../assets/Cards/Suit=Spades, Number=King.svg';
 
 const CombinedComponent = ({ onDrop }) => {
   const [tableau, setTableau] = useState(Array(10).fill([]));
-  const [foundation, setFoundation] = useState(Array(3).fill([])); // Foundation piles
+  const [foundation, setFoundation] = useState(Array(3).fill([])); 
   const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
-  const [filledFoundations, setFilledFoundations] = useState(0); // State to track filled foundation piles
+  const [filledFoundations, setFilledFoundations] = useState(0); 
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 5;
 
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
-      const cardsCount = 5; // Ensure max 5 cards for each stack
-      const cards = Array.from({ length: cardsCount }, (_, i) => {
-        const randomIndex = Math.floor(Math.random() * spadesCards.length);
-        const isVisible = i === cardsCount - 1; // Set isVisible to true only for the top card
-        return {
-          image: isVisible ? spadesCards[randomIndex] : CardBack, // Use CardBack image for face-down cards
-          isVisible: isVisible,
-        };
-      });
+      const cardsCount = 5;
+      let cards = [];
+  
+      if (cardsCount <= 10) {
+        cards = Array.from({ length: cardsCount }, (_, i) => {
+          const randomIndex = Math.floor(Math.random() * spadesCards.length);
+          const isVisible = i === cardsCount - 1; 
+          return {
+            image: isVisible ? spadesCards[randomIndex] : CardBack, 
+            isVisible: isVisible,
+          };
+        });
+      }
+  
       return cards;
     });
-    setTableau(initialTableau);
+const shuffledCards = shuffleArray(spadesCards); // Shuffle the spadesCards array
+const remainingCards = shuffledCards.slice(0, 4); // Get the first 4 cards after shuffling
+for (let i = 0; i < remainingCards.length; i++) {
+  initialTableau[i % 10].push({ image: remainingCards[i], isVisible: true });
+}
+setTableau(initialTableau);
+
   };
+  
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+  
   
   
   useEffect(() => {
@@ -104,7 +124,7 @@ const CombinedComponent = ({ onDrop }) => {
     const numMovedCards = cardData.selectedCards.length;
   
     // Check if the move is valid for moving the selected cards to the target stack
-    if (isValidMultiCardMove(cardData.selectedCards, targetStack)) {
+    if (isValidMultiCardMove(cardData.selectedCards, targetStack) || targetStack.length === 0) {
       const updatedTableau = tableau.map((stack, i) => {
         if (i === cardData.stackIndex) {
           return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
@@ -132,15 +152,17 @@ const CombinedComponent = ({ onDrop }) => {
     }
   };
   
+  
 
   const isValidMultiCardMove = (selectedCards, targetStack) => {
-    if (selectedCards.length === 0) return false;
+    if (selectedCards.length === 0 || !selectedCards.every(card => card && card.image)) return false;
   
     const bottomCardRank = getRank(targetStack[targetStack.length - 1].image);
     const topCardRank = getRank(selectedCards[0].image);
   
     return bottomCardRank === topCardRank + 1;
   };
+  
 
   const checkForWin = (tableau) => {
     // Check if all tableau stacks are empty
