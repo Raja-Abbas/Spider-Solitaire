@@ -42,7 +42,6 @@ const CombinedComponent = ({ onDrop }) => {
           };
         });
       }
-  
       return cards;
     });
 const shuffledCards = shuffleArray(spadesCards); // Shuffle the spadesCards array
@@ -119,10 +118,10 @@ setTableau(initialTableau);
     e.preventDefault();
     const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
     const targetStack = tableau[stackIndex];
-  
+    
     // Calculate the number of cards being moved
     const numMovedCards = cardData.selectedCards.length;
-  
+    
     // Check if the move is valid for moving the selected cards to the target stack
     if (isValidMultiCardMove(cardData.selectedCards, targetStack) || targetStack.length === 0) {
       const updatedTableau = tableau.map((stack, i) => {
@@ -138,19 +137,20 @@ setTableau(initialTableau);
         }
         return stack;
       });
-  
+    
       // Update tableau state with the modified stacks
       setTableau(updatedTableau);
-  
+    
       // Record the move before updating the tableau state
       recordMove(tableau, updatedTableau);
-  
+    
       // Check for win condition
       checkForWin(updatedTableau);
     } else {
       console.log("Invalid move.");
     }
   };
+  
   
   
 
