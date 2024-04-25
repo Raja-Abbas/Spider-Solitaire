@@ -408,11 +408,11 @@ const CombinedComponent = ({ onDrop }) => {
           </div>
         </div>
         {/* Render foundation piles */}
-        <div className='flex flex-col gap-3 items-center justify-center pt-[10px]'>
+        <div className='flex flex-col gap-1 items-center justify-center pt-[10px]'>
           {foundation.map((pile, pileIndex) => (
             <div
               key={pileIndex}
-              className='relative bg-gray-50 w-[80px] h-[80px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              className='relative bg-gray-50 w-[80px] h-[100px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
               onDrop={(e) => handleFoundationDrop(e, pileIndex)}
               onDragOver={(e) => e.preventDefault()}
             >
