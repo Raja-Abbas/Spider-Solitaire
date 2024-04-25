@@ -388,7 +388,7 @@ const CombinedComponent = ({ onDrop }) => {
         </div>
       )}
       {gameWon && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
           <div className="z-100 w-[600px] h-[400px] p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
             <img src={CongratsImage} alt="Congrats"/>
             <h2 className="text-xl font-bold mb-4 text-center">You won the game!</h2>
@@ -443,7 +443,7 @@ const CombinedComponent = ({ onDrop }) => {
           {tableau.map((stack, stackIndex) => (
             <div
               key={stackIndex}
-              className='relative w-[80px] h-[100px] flex justify-center items-center border border-gray-700 text-center rounded-lg'
+              className='relative w-[80px] h-[100px] flex justify-center items-center border-4 border-cyan-800 text-center rounded-lg'
               onDrop={(e) => handleSingleCardDrop(e, stackIndex)}
               onDragOver={(e) => e.preventDefault()}
             >

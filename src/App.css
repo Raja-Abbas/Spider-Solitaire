@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.hinted {
-    border: 2px dashed yellow; /* Change color or style as desired */
-  }
-  
+body{
+  background: url(./assets/pexels-pixabay-235985.jpg);
+}  

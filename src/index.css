@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body{
+    margin: 0px !important;
+}
+.video-container {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    width:100vw;
+    height: 100vh;
+    overflow: hidden;
+
+  }
+  video{
+    object-fit:fill;
+  }

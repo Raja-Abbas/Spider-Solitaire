@@ -49,7 +49,7 @@ function MyTimer({ expiryTimestamp }) {
           <button onClick={handleExit} className="w-max mx-auto hover:p-2 hover:bg-white hover:underline transition-all text-[20px] italic mb-5 text-orange-500">Exit Game</button>
         </div>
       ) : (
-        <div className='shadow-2xl border border-green-900 p-2 bg-black text-white z-10000 m-2 mt-[10px] rounded-xl w-auto flex flex-col justify-center' style={{textAlign: 'center'}}>
+        <div className='shadow-2xl border-4 border-cyan-800 p-2 bg-black text-white z-10000 m-2 mt-[10px] rounded-xl w-auto flex flex-col justify-center' style={{textAlign: 'center'}}>
           <div className='font-bold mb-4' style={{fontSize: '30px'}}>
             <span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span>
           </div>
