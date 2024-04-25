@@ -115,42 +115,51 @@ setTableau(initialTableau);
     }
   };
   
-  const handleSingleCardDrop = (e, stackIndex) => {
-    e.preventDefault();
-    const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
-    const targetStack = tableau[stackIndex];
-    
-    // Calculate the number of cards being moved
-    const numMovedCards = cardData.selectedCards.length;
-    
-    // Check if the move is valid for moving the selected cards to the target stack
-    if (isValidMultiCardMove(cardData.selectedCards, targetStack) || targetStack.length === 0) {
-      const updatedTableau = tableau.map((stack, i) => {
-        if (i === cardData.stackIndex) {
-          return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
-        } else if (i === stackIndex) {
-          const visibleIndex = stack.findIndex(card => card.isVisible); // Find the index of the first visible card
-          const updatedStack = stack.map((card, index) => ({
-            ...card,
-            isVisible: index >= visibleIndex, // Set isVisible to true for cards starting from the first visible card
-          }));
-          return [...updatedStack, ...cardData.selectedCards]; // Add selected cards to the target stack
+const handleSingleCardDrop = (e, stackIndex) => {
+  e.preventDefault();
+  const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
+  const targetStack = tableau[stackIndex];
+  
+  // Calculate the number of cards being moved
+  const numMovedCards = cardData.selectedCards.length;
+  
+  // Check if the move is valid for moving the selected cards to the target stack
+  if (isValidMultiCardMove(cardData.selectedCards, targetStack) || targetStack.length === 0) {
+    const updatedTableau = tableau.map((stack, i) => {
+      if (i === cardData.stackIndex) {
+        // Check if the dropped card is an initial deal card
+        if (dealCount < maxDealCount && cardData.cardIndex > 0) {
+          // Find the index of the card behind the dropped card
+          const cardBehindIndex = cardData.cardIndex - 1;
+          // Replace the card behind the dropped card with a random spade card
+          const randomIndex = Math.floor(Math.random() * spadesCards.length);
+          stack[cardBehindIndex] = { image: spadesCards[randomIndex], isVisible: true };
         }
-        return stack;
-      });
-    
-      // Update tableau state with the modified stacks
-      setTableau(updatedTableau);
-    
-      // Record the move before updating the tableau state
-      recordMove(tableau, updatedTableau);
-    
-      // Check for win condition
-      checkForWin(updatedTableau);
-    } else {
-      console.log("Invalid move.");
-    }
-  };
+        return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
+      } else if (i === stackIndex) {
+        const visibleIndex = stack.findIndex(card => card.isVisible); // Find the index of the first visible card
+        const updatedStack = stack.map((card, index) => ({
+          ...card,
+          isVisible: index >= visibleIndex, // Set isVisible to true for cards starting from the first visible card
+        }));
+        return [...updatedStack, ...cardData.selectedCards]; // Add selected cards to the target stack
+      }
+      return stack;
+    });
+  
+    // Update tableau state with the modified stacks
+    setTableau(updatedTableau);
+  
+    // Record the move before updating the tableau state
+    recordMove(tableau, updatedTableau);
+  
+    // Check for win condition
+    checkForWin(updatedTableau);
+  } else {
+    console.log("Invalid move.");
+  }
+};
+
   
   
   
