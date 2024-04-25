@@ -24,6 +24,7 @@ const CombinedComponent = ({ onDrop }) => {
   const [movesHistory, setMovesHistory] = useState([]);
   const [filledFoundations, setFilledFoundations] = useState(0); 
   const [difficulty, setDifficulty] = useState(null); // State to store the selected difficulty
+  const [gameWon, setGameWon] = useState(false); // State to track if the game is won
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 5;
@@ -36,32 +37,34 @@ const CombinedComponent = ({ onDrop }) => {
       };
       setFoundation(Array(pilesCount[difficultyLevel]).fill([]));
     };
-  const dealInitialCards = () => {
-    const initialTableau = tableau.map((_, index) => {
-      const cardsCount = 5;
-      let cards = [];
+    const dealInitialCards = () => {
+      const initialTableau = tableau.map((_, index) => {
+        const cardsCount = index < 4 ? 5 : 4; // First 4 stacks get 5 cards, the rest get 4 cards
+        let cards = [];
+    
+        if (cardsCount <= 10) {
+          cards = Array.from({ length: cardsCount }, (_, i) => {
+            const randomIndex = Math.floor(Math.random() * spadesCards.length);
+            const isVisible = i === cardsCount - 1; 
+            return {
+              image: isVisible ? spadesCards[randomIndex] : CardBack, 
+              isVisible: isVisible,
+            };
+          });
+        }
+        return cards;
+      });
   
-      if (cardsCount <= 10) {
-        cards = Array.from({ length: cardsCount }, (_, i) => {
-          const randomIndex = Math.floor(Math.random() * spadesCards.length);
-          const isVisible = i === cardsCount - 1; 
-          return {
-            image: isVisible ? spadesCards[randomIndex] : CardBack, 
-            isVisible: isVisible,
-          };
-        });
+      const shuffledCards = shuffleArray(spadesCards); // Shuffle the spadesCards array
+      const remainingCards = shuffledCards.slice(40); // Get the last 44 cards after shuffling
+  
+      for (let i = 0; i < remainingCards.length; i++) {
+        initialTableau[i % 10].push({ image: remainingCards[i], isVisible: true });
       }
-      console.log(cards)
-      return cards;
-    });
-const shuffledCards = shuffleArray(spadesCards); // Shuffle the spadesCards array
-const remainingCards = shuffledCards.slice(0, 4); // Get the first 4 cards after shuffling
-for (let i = 0; i < remainingCards.length; i++) {
-  initialTableau[i % 10].push({ image: remainingCards[i], isVisible: true });
-}
-setTableau(initialTableau);
-
-  };
+  
+      setTableau(initialTableau);
+    };
+  
   
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -112,64 +115,72 @@ setTableau(initialTableau);
     }
     return 0; // Return 0 if rank extraction fails
   };
-
   const handleSingleCardDragStart = (e, stackIndex, cardIndex) => {
-    const selectedCards = tableau[stackIndex].slice(cardIndex);
-    const isDescendingSequence = isDescending(selectedCards);
-  
-    // Check if the selected cards form a descending sequence
-    if (isDescendingSequence) {
-      e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex, selectedCards }));
+    // Check if the game is won
+    if (!gameWon) {
+      const selectedCards = tableau[stackIndex].slice(cardIndex);
+      const isDescendingSequence = isDescending(selectedCards);
+    
+      // Check if the selected cards form a descending sequence
+      if (isDescendingSequence) {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ stackIndex, cardIndex, selectedCards }));
+      } else {
+        console.log("Cannot drag cards that are not in descending order.");
+        e.preventDefault(); // Prevent dragging if the cards are not in descending order
+      }
     } else {
-      console.log("Cannot drag cards that are not in descending order.");
-      e.preventDefault(); // Prevent dragging if the cards are not in descending order
+      e.preventDefault(); // Prevent dragging if the game is won
     }
   };
   
-const handleSingleCardDrop = (e, stackIndex) => {
-  e.preventDefault();
-  const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
-  const targetStack = tableau[stackIndex];
-  
-  // Calculate the number of cards being moved
-  const numMovedCards = cardData.selectedCards.length;
-  
-  // Check if the move is valid for moving the selected cards to the target stack
-  if (isValidMultiCardMove(cardData.selectedCards, targetStack) || targetStack.length === 0) {
-    const updatedTableau = tableau.map((stack, i) => {
-      if (i === cardData.stackIndex) {
-        // Check if the dropped card is an initial deal card
-        if (dealCount < maxDealCount && cardData.cardIndex > 0) {
-          // Find the index of the card behind the dropped card
-          const cardBehindIndex = cardData.cardIndex - 1;
-          // Replace the card behind the dropped card with a random spade card
-          const randomIndex = Math.floor(Math.random() * spadesCards.length);
-          stack[cardBehindIndex] = { image: spadesCards[randomIndex], isVisible: true };
-        }
-        return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
-      } else if (i === stackIndex) {
-        const visibleIndex = stack.findIndex(card => card.isVisible); // Find the index of the first visible card
-        const updatedStack = stack.map((card, index) => ({
-          ...card,
-          isVisible: index >= visibleIndex, // Set isVisible to true for cards starting from the first visible card
-        }));
-        return [...updatedStack, ...cardData.selectedCards]; // Add selected cards to the target stack
+  const handleSingleCardDrop = (e, stackIndex) => {
+    // Check if the game is won
+    if (!gameWon) {
+      e.preventDefault();
+      const cardData = JSON.parse(e.dataTransfer.getData('text/plain'));
+      const targetStack = tableau[stackIndex];
+    
+      // Calculate the number of cards being moved
+      const numMovedCards = cardData.selectedCards.length;
+    
+      // Check if the move is valid for moving the selected cards to the target stack
+      if (isValidMultiCardMove(cardData.selectedCards, targetStack) || targetStack.length === 0) {
+        const updatedTableau = tableau.map((stack, i) => {
+          if (i === cardData.stackIndex) {
+            // Check if the dropped card is an initial deal card
+            if (dealCount < maxDealCount && cardData.cardIndex > 0) {
+              // Find the index of the card behind the dropped card
+              const cardBehindIndex = cardData.cardIndex - 1;
+              // Replace the card behind the dropped card with a random spade card
+              const randomIndex = Math.floor(Math.random() * spadesCards.length);
+              stack[cardBehindIndex] = { image: spadesCards[randomIndex], isVisible: true };
+            }
+            return stack.slice(0, cardData.cardIndex); // Remove selected cards from the source stack
+          } else if (i === stackIndex) {
+            const visibleIndex = stack.findIndex(card => card.isVisible); // Find the index of the first visible card
+            const updatedStack = stack.map((card, index) => ({
+              ...card,
+              isVisible: index >= visibleIndex, // Set isVisible to true for cards starting from the first visible card
+            }));
+            return [...updatedStack, ...cardData.selectedCards]; // Add selected cards to the target stack
+          }
+          return stack; // Return the original stack if the condition is not met
+        });
+    
+        // Update tableau state with the modified stacks
+        setTableau(updatedTableau);
+    
+        // Record the move before updating the tableau state
+        recordMove(tableau, updatedTableau);
+    
+        // Check for win condition
+        checkForWin(updatedTableau);
+      } else {
+        console.log("Invalid move.");
       }
-      return stack; // Return the original stack if the condition is not met
-    });
+    }
+  };
   
-    // Update tableau state with the modified stacks
-    setTableau(updatedTableau);
-  
-    // Record the move before updating the tableau state
-    recordMove(tableau, updatedTableau);
-  
-    // Check for win condition
-    checkForWin(updatedTableau);
-  } else {
-    console.log("Invalid move.");
-  }
-};
 
 
 
@@ -232,9 +243,22 @@ const handleSingleCardDrop = (e, stackIndex) => {
     setFilledFoundations(0); // Reset the filled foundation piles count
   };
 
-const handleUndo = () => {
+  const handleUndo = () => {
+    // Check if there are moves in the history to undo
+    if (movesHistory.length > 0) {
+      // Get the last recorded move from the history
+      const lastMove = movesHistory[movesHistory.length - 1];
+      
+      // Set the tableau state to the state before the last move
+      setTableau(lastMove.before);
+      
+      // Remove the last move from the history
+      setMovesHistory(movesHistory.slice(0, -1));
+    } else {
+      console.log("No moves to undo.");
+    }
+  };
   
-};
 
   const handleFoundationDrop = (e, pileIndex) => {
     e.preventDefault();
@@ -338,9 +362,9 @@ const handleUndo = () => {
     // Check if all foundation piles are filled
     const allPilesFilled = foundation.every(pile => pile.length === 13);
   
-    // If all piles are filled, display a win message
+     // If all piles are filled, set gameWon to true
     if (allPilesFilled) {
-      alert("Congratulations! You won the game!");
+      setGameWon(true);
     }
   }, [foundation]);
   
@@ -355,6 +379,14 @@ const handleUndo = () => {
               <button onClick={() => handleDifficultySelection('medium')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Medium</button>
               <button onClick={() => handleDifficultySelection('hard')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Hard</button>
             </div>
+          </div>
+        </div>
+      )}
+      {gameWon && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
+            <h2 className="text-xl font-bold mb-4 text-center">Congratulations!<br/> You won the game!</h2>
+            <button onClick={() => setGameWon(false)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Play Again</button>
           </div>
         </div>
       )}
