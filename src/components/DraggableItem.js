@@ -23,10 +23,19 @@ const CombinedComponent = ({ onDrop }) => {
   const [dealCount, setDealCount] = useState(0);
   const [movesHistory, setMovesHistory] = useState([]);
   const [filledFoundations, setFilledFoundations] = useState(0); 
+  const [difficulty, setDifficulty] = useState(null); // State to store the selected difficulty
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 5;
-
+  const handleDifficultySelection = (difficultyLevel) => {
+      setDifficulty(difficultyLevel);
+      const pilesCount = {
+        easy: 1,
+        medium: 2,
+        hard: 3
+      };
+      setFoundation(Array(pilesCount[difficultyLevel]).fill([]));
+    };
   const dealInitialCards = () => {
     const initialTableau = tableau.map((_, index) => {
       const cardsCount = 5;
@@ -65,8 +74,10 @@ setTableau(initialTableau);
   
   
   useEffect(() => {
-    dealInitialCards();
-  }, []);
+    if (difficulty) {
+      dealInitialCards();
+    }
+  }, [difficulty]);
 
   const isDescending = (cards) => {
     for (let i = 1; i < cards.length; i++) {
@@ -144,7 +155,7 @@ const handleSingleCardDrop = (e, stackIndex) => {
         }));
         return [...updatedStack, ...cardData.selectedCards]; // Add selected cards to the target stack
       }
-      return stack;
+      return stack; // Return the original stack if the condition is not met
     });
   
     // Update tableau state with the modified stacks
@@ -159,6 +170,8 @@ const handleSingleCardDrop = (e, stackIndex) => {
     console.log("Invalid move.");
   }
 };
+
+
 
   
   
@@ -219,15 +232,9 @@ const handleSingleCardDrop = (e, stackIndex) => {
     setFilledFoundations(0); // Reset the filled foundation piles count
   };
 
-  const handleUndo = () => {
-    if (movesHistory.length > 0) {
-      const lastMove = movesHistory.pop(); // Remove the last move from the history
-      setTableau(lastMove.before); // Restore the tableau state to the state before the last move
-      setMovesHistory([...movesHistory]); // Update the moves history after removing the last move
-    } else {
-      console.log("No moves to undo.");
-    }
-  };
+const handleUndo = () => {
+  
+};
 
   const handleFoundationDrop = (e, pileIndex) => {
     e.preventDefault();
@@ -339,6 +346,18 @@ const handleSingleCardDrop = (e, stackIndex) => {
   
   return (
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
+      {!difficulty && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-bold mb-4 text-center">Select Difficulty</h2>
+            <div className="flex justify-center gap-4">
+              <button onClick={() => handleDifficultySelection('easy')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Easy</button>
+              <button onClick={() => handleDifficultySelection('medium')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Medium</button>
+              <button onClick={() => handleDifficultySelection('hard')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Hard</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className='flex flex-col w-auto'>
         <div className='pt-[10px] flex flex-col items-center w-auto'>
           <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[70px] h-[100px]" src={GoogleImage} alt="Google Image"/>
