@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import GoogleImage from '../assets/CardBack.png';
 import CardBack from '../assets/CardBack.png'; // Add a card back image for face-down cards
+import CongratsImage from '../assets/pngegg.png';
 
 // Import provided card images for Spades
 import SpadesAce from '../assets/Cards/Suit=Spades, Number=Ace.svg';
@@ -354,6 +355,9 @@ const CombinedComponent = ({ onDrop }) => {
       }
     });
   };
+  const handleNewGame = () => {
+    window.location.reload(); 
+  };
 
   // Call this function whenever the tableau or foundation piles are updated
   useEffect(() => {
@@ -385,9 +389,10 @@ const CombinedComponent = ({ onDrop }) => {
       )}
       {gameWon && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
-            <h2 className="text-xl font-bold mb-4 text-center">Congratulations!<br/> You won the game!</h2>
-            <button onClick={() => setGameWon(false)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Play Again</button>
+          <div className="z-100 w-[600px] h-[400px] p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
+            <img src={CongratsImage} alt="Congrats"/>
+            <h2 className="text-xl font-bold mb-4 text-center">You won the game!</h2>
+            <button onClick={handleNewGame} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Play Again</button>
           </div>
         </div>
       )}
