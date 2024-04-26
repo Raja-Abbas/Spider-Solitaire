@@ -200,13 +200,52 @@ const CombinedComponent = ({ onDrop }) => {
   };  
 
   const addCardToStacks = () => {
-    const updatedTableau = tableau.map((stack, stackIndex) => {
-      // Add a new card to the stack
-      let randomIndex = Math.floor(Math.random() * spadesCards.length);
-      return [...stack, { image: spadesCards[randomIndex], isVisible: true }];
+    const shuffledCards = shuffleArray(spadesCards); // Shuffle the spadesCards array
+  
+    const cardCounts = {}; // Object to keep track of the counts of each card
+    const cardsToAdd = []; // Array to store cards to be added to the stacks
+  
+    // Initialize cardCounts for each card in shuffledCards
+    shuffledCards.forEach(card => {
+      cardCounts[card] = cardCounts[card] ? cardCounts[card] + 1 : 1;
     });
+  
+    const requiredSets = Math.ceil(spadesCards.length / 13) * 3; // Calculate the required number of sets
+  
+    // Loop until each set of 13 cards appears at least three times in each column
+    while (!isMinCardDistributionMet(cardCounts)) {
+      shuffledCards.forEach(card => {
+        // Check if the card count is less than 3 and add it to the cardsToAdd array
+        if (cardCounts[card] < 3) {
+          cardsToAdd.push(card);
+          cardCounts[card]++; // Increment the count for the added card
+        }
+      });
+    }
+  
+    const updatedTableau = tableau.map((stack, stackIndex) => {
+      // Add one card to each stack
+      const card = cardsToAdd.shift(); // Get the first card from the cardsToAdd array
+      if (card) {
+        stack.push({ image: card, isVisible: true }); // Add the card to the stack
+      }
+      return stack;
+    });
+  
     setTableau(updatedTableau);
   };
+  
+  const isMinCardDistributionMet = (cardCounts) => {
+    // Check if each card appears at least three times in the distribution
+    return Object.values(cardCounts).every(count => count >= 3);
+  };
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -221,6 +260,7 @@ const CombinedComponent = ({ onDrop }) => {
   };
 
   const handleReset = () => {
+    window.location.reload(); 
     dealInitialCards();
     setDealCount(0);
     setMovesHistory([]);
