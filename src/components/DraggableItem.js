@@ -44,7 +44,7 @@ const CombinedComponent = ({ onDrop }) => {
         const cardsCount = index < 4 ? 5 : 4; // First 4 stacks get 5 cards, the rest get 4 cards
         let cards = [];
     
-        if (cardsCount <= 10) {
+        if (cardsCount <= 13) {
           cards = Array.from({ length: cardsCount }, (_, i) => {
             const randomIndex = Math.floor(Math.random() * spadesCards.length);
             const isVisible = i === cardsCount - 1; 
@@ -365,7 +365,7 @@ const CombinedComponent = ({ onDrop }) => {
       {!difficulty && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
           <div className="bg-black p-8 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4 text-center text-white capitalize">Select Difficulty</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center text-white capitalize">SELECT DIFFICULTY</h2>
             <div className="flex flex-col justify-center gap-4">
               <button onClick={() => handleDifficultySelection('easy')} className="bg-blue-500 hover:bg-blue-700 text-white text-xl transition-all font-bold py-2 px-4 rounded">Easy</button>
               <button onClick={() => handleDifficultySelection('medium')} className="bg-blue-500 hover:bg-blue-700 text-white text-xl transition-all font-bold py-2 px-4 rounded">Medium</button>

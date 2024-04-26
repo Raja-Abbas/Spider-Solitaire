@@ -38,14 +38,12 @@ function MyTimer({ expiryTimestamp }) {
   };
 
   const handlePause = () => {
-    // Add background styles when paused
     setBackgroundStyle('bg-gray-900 bg-opacity-75 z-50 w-screen h-screen absolute top-0 right-0');
     setBackgroundStyle2('w-[150px] ml-auto m-2');
     pause();
   };
 
   const handleResume = () => {
-    // Remove background styles when resumed
     setBackgroundStyle('');
     setBackgroundStyle2('');
     resume();
