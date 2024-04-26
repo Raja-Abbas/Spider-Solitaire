@@ -2,8 +2,8 @@ import React from 'react';
 
 const SpiderSolitaireRulesPopup = ({ onClose }) => {
   return (
-    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
-      <div className="bg-white p-8 rounded-lg max-w-md">
+    <div className="fixed bg-opacity-100 top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 z-50">
+      <div className="bg-black flex justify-center flex-col text-cyan-500 p-8 rounded-lg max-w-md">
         <h2 className="text-xl font-bold mb-4">Spider Solitaire Rules</h2>
         <p className="mb-4">Read through the rules below to understand how to play Spider Solitaire:</p>
         <ul className="list-disc ml-6">
@@ -20,7 +20,7 @@ const SpiderSolitaireRulesPopup = ({ onClose }) => {
           </li>
           <li><strong>Winning:</strong> Fill all foundation piles with cards of the same suit, arranged from King to Ace.</li>
         </ul>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-6" onClick={onClose}>Close</button>
+        <button className="mt-2 w-[100px] mx-auto text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={onClose}>Close</button>
       </div>
     </div>
   );
