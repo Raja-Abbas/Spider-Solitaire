@@ -28,7 +28,7 @@ const App = () => {
     setShowRulesPopup(false);
   };
   return (
-    <div className='max-xl:hidden xl:mx-auto overflow-hidden border-black border relative w-[100%] flex justify-between h-screen px-2'>
+    <div className='max-xl:hidden xl:mx-auto overflow-hidden border-black border relative w-[100%] flex justify-between h-screen xl:px-2'>
       {/* {showRulesPopup && <SpiderSolitaireRulesPopup onClose={handleCloseRulesPopup} />} */}
       <DraggableItem onDrop={handleDrop} />
       <Timer/>
@@ -36,7 +36,7 @@ const App = () => {
         <img className='hover:w-[200px] hover:h-[270px] transition-all shadow-2xl w-[130px] h-[200px]' src={Image1} alt="Image"/>
       </div>
       <div className="video-container">
-      <video loop autoPlay muted className='w-screen h-screen video-container'>
+      <video loop autoPlay muted className='w-screen h-screen scale-115 video-container2'>
       <source src="Video/Video.mp4" type="video/mp4" />
       Sorry, your browser doesn't support videos.
       </video>

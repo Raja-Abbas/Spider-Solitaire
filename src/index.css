@@ -9,12 +9,21 @@ body{
     position: absolute;
     z-index: -1;
     top: 0;
-    left: 0;
+    left: 0px;
     width:100vw;
     height: 100vh;
     overflow: hidden;
-
+  }
+  .video-container2{
+    margin-left: -5px;
   }
   video{
     object-fit:fill;
   }
+
+
+  .scale-115 {
+    --tw-scale-x: 1.12;
+    --tw-scale-y: 1.2;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
