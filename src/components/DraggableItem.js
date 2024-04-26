@@ -200,24 +200,15 @@ const CombinedComponent = ({ onDrop }) => {
   };  
 
   const addCardToStacks = () => {
-    const updatedTableau = tableau.map(stack => {
-      if (stack.length < spadesCards.length) {
-        let randomIndex = Math.floor(Math.random() * spadesCards.length);
-        
-        // Check if the stack already contains a king
-        const containsKing = stack.some(card => getRank(card.image) === 13);
-  
-        // If the stack already contains a king, generate a new random index until a non-king card is selected
-        while (containsKing && getRank(spadesCards[randomIndex]) === 13) {
-          randomIndex = Math.floor(Math.random() * spadesCards.length);
-        }
-  
-        return [...stack, { image: spadesCards[randomIndex], isVisible: true }];
-      }
-      return stack;
+    const updatedTableau = tableau.map((stack, stackIndex) => {
+      // Add a new card to the stack
+      let randomIndex = Math.floor(Math.random() * spadesCards.length);
+      return [...stack, { image: spadesCards[randomIndex], isVisible: true }];
     });
     setTableau(updatedTableau);
   };
+  
+  
   
 
   const handleClick = () => {
