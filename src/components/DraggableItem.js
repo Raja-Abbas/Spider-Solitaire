@@ -373,12 +373,12 @@ const CombinedComponent = ({ onDrop }) => {
     <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       {!difficulty && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4 text-center">Select Difficulty</h2>
-            <div className="flex justify-center gap-4">
-              <button onClick={() => handleDifficultySelection('easy')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Easy</button>
-              <button onClick={() => handleDifficultySelection('medium')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Medium</button>
-              <button onClick={() => handleDifficultySelection('hard')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Hard</button>
+          <div className="bg-black p-8 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-4 text-center text-white capitalize">Select Difficulty</h2>
+            <div className="flex flex-col justify-center gap-4">
+              <button onClick={() => handleDifficultySelection('easy')} className="bg-blue-500 hover:bg-blue-700 text-white text-xl transition-all font-bold py-2 px-4 rounded">Easy</button>
+              <button onClick={() => handleDifficultySelection('medium')} className="bg-blue-500 hover:bg-blue-700 text-white text-xl transition-all font-bold py-2 px-4 rounded">Medium</button>
+              <button onClick={() => handleDifficultySelection('hard')} className="bg-blue-500 hover:bg-blue-700 text-white text-xl transition-all font-bold py-2 px-4 rounded">Hard</button>
             </div>
           </div>
         </div>
