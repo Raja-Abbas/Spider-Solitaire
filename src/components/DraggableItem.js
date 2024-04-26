@@ -370,7 +370,7 @@ const CombinedComponent = ({ onDrop }) => {
   }, [foundation]);
   
   return (
-    <div className='h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
+    <div className='pt-5 h-auto flex justify-around xl:w-[1200px] xl:mx-auto w-[100%]'>
       {!difficulty && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-gray-800 bg-opacity-50">
           <div className="bg-black p-8 rounded-lg shadow-lg">

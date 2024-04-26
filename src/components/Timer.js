@@ -49,13 +49,13 @@ function MyTimer({ expiryTimestamp }) {
           <button onClick={handleExit} className="w-max mx-auto hover:p-2 hover:bg-white hover:underline transition-all text-[20px] italic mb-5 text-orange-500">Exit Game</button>
         </div>
       ) : (
-        <div className='shadow-2xl border-4 border-cyan-800 p-2 bg-black text-white z-10000 m-2 mt-[10px] rounded-xl w-auto flex flex-col justify-center' style={{textAlign: 'center'}}>
+        <div className='mt-5 w-[150px] shadow-2xl border-4 border-cyan-800 p-2 bg-black text-white z-10000 m-2 rounded-xl flex flex-col justify-center' style={{textAlign: 'center'}}>
           <div className='font-bold mb-4' style={{fontSize: '30px'}}>
             <span>{hours}</span>:<span>{minutes}</span>:<span>{seconds}</span>
           </div>
-          <div className='flex gap-4 justify-center font-bold'>
-            <button className='hover:underline transition-all text-[20px] italic mb-10 text-orange-500' onClick={pause}>Pause</button>
-            <button className='hover:underline transition-all text-[20px] italic mb-10 text-orange-500' onClick={resume}>Resume</button>
+          <div className='flex flex-col justify-center font-bold'>
+            <button className='hover:underline transition-all text-[20px] italic mb-3 text-orange-500' onClick={pause}>Pause</button>
+            <button className='hover:underline transition-all text-[20px] italic mb-3 text-orange-500' onClick={resume}>Resume</button>
           </div>
           {/* <div className='flex justify-center'>
             <div className='cursor-pointer'>
