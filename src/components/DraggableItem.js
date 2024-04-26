@@ -26,6 +26,7 @@ const CombinedComponent = ({ onDrop }) => {
   const [filledFoundations, setFilledFoundations] = useState(0); 
   const [difficulty, setDifficulty] = useState(null); // State to store the selected difficulty
   const [gameWon, setGameWon] = useState(false); // State to track if the game is won
+  const [totalMoves, setTotalMoves] = useState(0); // State to track the total moves
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 5;
@@ -312,11 +313,7 @@ const CombinedComponent = ({ onDrop }) => {
 
   const recordMove = (before, after) => {
     // Check if the movesHistory array has reached the limit of 100 moves
-    if (movesHistory.length < 10) {
       setMovesHistory([...movesHistory, { before, after }]);
-    } else {
-      console.log("Maximum moves limit reached.");
-    }
   };
 
   const handleAutoMoveToFoundation = () => {
@@ -390,8 +387,9 @@ const CombinedComponent = ({ onDrop }) => {
       {gameWon && (
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
           <div className="z-100 w-[600px] h-[400px] p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
-            <img src={CongratsImage} alt="Congrats"/>
-            <h2 className="text-xl font-bold mb-4 text-center text-white">You won the game!</h2>
+            <img className='mb-0' src={CongratsImage} alt="Congrats"/>
+            <h2 className="text-xl font-bold -mt-6 mb-4 text-center text-white">You won the game <span className='text-red-500'>!</span></h2>
+            <h4 className="text-xl font-bold mb-4 text-center text-white">Moves : <span className='text-red-500'>{movesHistory.length}</span></h4>
             <button onClick={handleNewGame} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Play Again</button>
           </div>
         </div>
@@ -399,9 +397,9 @@ const CombinedComponent = ({ onDrop }) => {
       <div className='flex flex-col w-auto'>
         <div className='pt-[10px] flex flex-col items-center w-auto'>
           <img onClick={handleClick} className="hover:p-2 focus:animate-pulse hover:bg-gray-200 bg-white transition-all rounded-md w-[70px] h-[100px]" src={GoogleImage} alt="Google Image"/>
-          <div className="text-md text-cyan-200 mt-2 font-semibold">Moves: {movesHistory.length}</div>
-          <div className="text-md text-cyan-200 mt-2 font-semibold">Deals Left: {maxDealCount - dealCount}</div>
-          <p onClick={handleClick} className='w-auto text-cyan-200 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border text-center'>DEAL</p>
+          <div className="text-md text-cyan-200 mt-2 font-semibold">Moves: <span className='text-red-500 font-bold'>{movesHistory.length}</span></div>
+          <div className="text-md text-cyan-200 mt-2 font-semibold">Deals Left: <span className='text-red-500 font-bold'>{maxDealCount - dealCount}</span></div>
+          <p onClick={handleClick} className='w-auto py-2 px-4 text-red-500 hover:bg-black cursor-pointer transition-all p-1 mt-[10px] rounded-lg border border-cyan-200 text-center'>DEAL</p>
           <div className='flex flex-col justify-center items-center'>
             <button onClick={handleReset} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2'>Reset</button>
             <button onClick={handleUndo} className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2'>Undo</button>
