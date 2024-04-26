@@ -391,7 +391,7 @@ const CombinedComponent = ({ onDrop }) => {
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
           <div className="z-100 w-[600px] h-[400px] p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
             <img src={CongratsImage} alt="Congrats"/>
-            <h2 className="text-xl font-bold mb-4 text-center">You won the game!</h2>
+            <h2 className="text-xl font-bold mb-4 text-center text-white">You won the game!</h2>
             <button onClick={handleNewGame} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Play Again</button>
           </div>
         </div>
