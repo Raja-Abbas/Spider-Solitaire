@@ -181,15 +181,6 @@ const CombinedComponent = ({ onDrop }) => {
 };
 
 
-
-  
-
-
-
-  
-  
-  
-
   const isValidMultiCardMove = (selectedCards, targetStack) => {
     if (selectedCards.length === 0 || !selectedCards.every(card => card && card.image)) return false;
   
