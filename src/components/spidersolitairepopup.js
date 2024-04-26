@@ -8,8 +8,8 @@ const SpiderSolitaireRulesPopup = ({ onClose }) => {
         <p className="mb-4">Read through the rules below to understand how to play Spider Solitaire:</p>
         <ul className="list-disc ml-6">
           <li><strong>Objective:</strong> Arrange all cards of each suit in descending order from King to Ace to clear them from the tableau.</li>
-          <li><strong>Setup:</strong> Two decks of cards are dealt into 7 columns. Each column contains a mix of face-up and face-down cards.</li>
-          <li><strong>Foundation:</strong> Three empty foundation piles at the top. Complete descending sequences from King to Ace are moved to these piles.</li>
+          <li><strong>Setup:</strong> Two decks of cards are dealt into 10 columns. Each column contains a mix of face-up and face-down cards.</li>
+          <li><strong>Foundation:</strong>Empty foundation piles at the left side. Complete descending sequences from King to Ace are moved to these piles.</li>
           <li><strong>Gameplay:</strong>
             <ul className="list-disc ml-6">
               <li>Move cards within the tableau to create descending sequences of cards of the same suit.</li>
