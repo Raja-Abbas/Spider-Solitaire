@@ -273,15 +273,39 @@ const CombinedComponent = ({ onDrop }) => {
       // Get the last recorded move from the history
       const lastMove = movesHistory[movesHistory.length - 1];
       
-      // Set the tableau state to the state before the last move
-      setTableau(lastMove.before);
-      
-      // Remove the last move from the history
-      setMovesHistory(movesHistory.slice(0, -1));
+      // Determine the type of the last move
+      const lastMoveType = getLastMoveType(lastMove);
+  
+      // Adjust the number of moves to go back based on the move type
+      const movesToGoBack = lastMoveType === 'foundation' ? 2 : 1;
+  
+      // Find the state before the specified number of moves
+      let stateBeforeUndo = tableau;
+      for (let i = 0; i < movesToGoBack; i++) {
+        if (movesHistory.length > i) {
+          stateBeforeUndo = movesHistory[movesHistory.length - 1 - i].before;
+        }
+      }
+  
+      // Set the tableau state to the state before the specified number of moves
+      setTableau(stateBeforeUndo);
+  
+      // Remove the last move(s) from the history
+      setMovesHistory(movesHistory.slice(0, -movesToGoBack));
     } else {
       console.log("No moves to undo.");
     }
   };
+  
+  const getLastMoveType = (move) => {
+    // Check if the move involves sending cards to the foundation
+    if (move.after.some(stack => stack.length < move.before.some(stack => stack.length))) {
+      return 'foundation';
+    } else {
+      return 'tableau';
+    }
+  };
+  
   
 
   const handleFoundationDrop = (e, pileIndex) => {
