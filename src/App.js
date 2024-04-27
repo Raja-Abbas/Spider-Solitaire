@@ -3,7 +3,8 @@ import DraggableItem from './components/DraggableItem';
 import Timer from './components/Timer'
 import Image1 from './assets/Image2.png'
 import SpiderSolitaireRulesPopup from './components/spidersolitairepopup';
-import ReactPlayer from 'react-player'
+import ReactPlayer from 'react-player';
+import Image2 from './assets/vecteezy_dark-red-racing-banner-background_29093044-1.jpg';
 
 import './index.css';
 
@@ -45,10 +46,11 @@ const App = () => {
         <img className='hover:w-[200px] hover:h-[270px] transition-all shadow-2xl w-[130px] h-[200px]' src={Image1} alt="Image"/>
       </div>
       <div className="video-container">
-        <video loop autoPlay muted className='w-screen h-screen scale-115 video-container2'>
+        {/* <video loop autoPlay muted className='w-screen h-screen scale-115 video-container2'>
           <source src="Video/Video.mp4" type="video/mp4" />
           Sorry, your browser doesn't support videos.
-        </video>
+        </video> */}
+        <img className='video-container' src={Image2} alt="Image1"/>
       </div>
     </div>
   );

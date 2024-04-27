@@ -406,8 +406,8 @@ const CombinedComponent = ({ onDrop }) => {
         </div>
       )}
       {gameWon && (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center">
-          <div className="z-100 w-[600px] h-[400px] p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
+        <div className="fixed z-[10000] bg-opacity-75 top-0 left-0 w-full h-full flex justify-center items-center">
+          <div className="z-[10000] w-[600px] h-[400px] p-8 rounded-lg shadow-lg flex flex-col justify-center items-center">
             <img className='mb-0' src={CongratsImage} alt="Congrats"/>
             <h2 className="text-xl font-bold -mt-6 mb-4 text-center text-white">You won the game <span className='text-red-500'>!</span></h2>
             <h4 className="text-xl font-bold mb-4 text-center text-white">Moves : <span className='text-red-500'>{movesHistory.length}</span></h4>
