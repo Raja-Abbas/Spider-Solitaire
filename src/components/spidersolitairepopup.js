@@ -3,9 +3,9 @@ import React from 'react';
 const SpiderSolitaireRulesPopup = ({ onClose }) => {
   return (
     <div className="fixed bg-opacity-100 top-0 left-0 w-full h-full flex items-center justify-center bg-gray-900 z-50">
-      <div className="bg-black flex justify-center flex-col text-cyan-500 p-8 rounded-lg max-w-md">
-        <h2 className="text-xl font-bold mb-4">Spider Solitaire Rules</h2>
-        <p className="mb-4">Read through the rules below to understand how to play Spider Solitaire:</p>
+      <div className="bg-black flex justify-center flex-col text-cyan-500 p-6 rounded-lg max-w-md">
+        <h2 className="text-xl font-bold mb-2">Spider Solitaire Rules</h2>
+        <p className="mb-2">Read through the rules below to understand how to play Spider Solitaire:</p>
         <ul className="list-disc ml-6">
           <li><strong>Objective:</strong> Arrange all cards of each suit in descending order from King to Ace to clear them from the tableau.</li>
           <li><strong>Setup:</strong> Two decks of cards are dealt into 10 columns. Each column contains a mix of face-up and face-down cards.</li>
