@@ -30,6 +30,15 @@ const CombinedComponent = ({ onDrop }) => {
 
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 5;
+  const loadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = (error) => reject(error);
+      image.src = src;
+    });
+  };
+
   const handleDifficultySelection = (difficultyLevel) => {
       setDifficulty(difficultyLevel);
       const pilesCount = {
@@ -80,7 +89,13 @@ const CombinedComponent = ({ onDrop }) => {
   
   useEffect(() => {
     if (difficulty) {
-      dealInitialCards();
+      Promise.all(spadesCards.map(loadImage))
+        .then(() => {
+          dealInitialCards();
+        })
+        .catch((error) => {
+          console.error('Error loading images:', error);
+        });
     }
   }, [difficulty]);
 
