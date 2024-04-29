@@ -553,7 +553,7 @@ const CombinedComponent = ({ onDrop }) => {
                   key={cardIndex}
                   src={card.isVisible ? card.image : CardBack}
                   alt={`Tableau Card ${stackIndex}-${cardIndex}`}
-                  className='item cursor-pointer w-[100px] h-[150px] absolute'
+                  className='item cursor-grab after:cursor-grabbing w-[100px] h-[150px] absolute'
                   variants={item}
                   draggable={card.isVisible}
                   style={{
