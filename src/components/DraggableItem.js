@@ -271,7 +271,7 @@ const CombinedComponent = ({ onDrop }) => {
     if (movesHistory.length > 0) {
       // Get the last recorded move from the history
       const lastMove = movesHistory[movesHistory.length - 1];
-      
+  
       // Determine the type of the last move
       const lastMoveType = getLastMoveType(lastMove);
   
@@ -286,6 +286,19 @@ const CombinedComponent = ({ onDrop }) => {
         }
       }
   
+      // If the last move involved sending cards to the foundation
+      if (lastMoveType === 'foundation') {
+        // Check if any foundation pile contains a complete suit that wasn't there before the move
+        const newCompletedSuitIndex = lastMove.after.findIndex((pile, index) => pile.length === 13 && lastMove.before[index].length < 13);
+  
+        // If a completed suit is found, remove it from the foundation
+        if (newCompletedSuitIndex !== -1) {
+          const updatedFoundation = [...foundation];
+          updatedFoundation.splice(newCompletedSuitIndex, 1);
+          setFoundation(updatedFoundation);
+        }
+      }
+  
       // Set the tableau state to the state before the specified number of moves
       setTableau(stateBeforeUndo);
   
@@ -295,6 +308,9 @@ const CombinedComponent = ({ onDrop }) => {
       console.log("No moves to undo.");
     }
   };
+  
+  
+  
   
   const getLastMoveType = (move) => {
     // Check if the move involves sending cards to the foundation
