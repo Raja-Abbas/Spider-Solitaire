@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import GoogleImage from '../assets/CardBack.png';
 import CardBack from '../assets/CardBack.png'; // Add a card back image for face-down cards
 import CongratsImage from '../assets/pngegg.png';
+import { motion } from "framer-motion";
 
 // Import provided card images for Spades
 import SpadesAce from '../assets/Cards/Suit=Spades, Number=Ace.svg';
@@ -27,9 +28,28 @@ const CombinedComponent = ({ onDrop }) => {
   const [difficulty, setDifficulty] = useState(null); // State to store the selected difficulty
   const [gameWon, setGameWon] = useState(false); // State to track if the game is won
   const [totalMoves, setTotalMoves] = useState(0); // State to track the total moves
-
   const spadesCards = [SpadesAce, Spades2, Spades3, Spades4, Spades5, Spades6, Spades7, Spades8, Spades9, Spades10, Spades11, Spades12, Spades13];
   const maxDealCount = 5;
+  const container = {
+    hidden: { opacity: 1, scale: 0 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delayChildren: 0.3,
+        staggerChildren: 0.2
+      }
+    }
+  };
+  
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      delayChildren: 0.3,
+      y: 0,
+      opacity: 1
+    }
+  };
   const loadImage = (src) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
@@ -516,6 +536,12 @@ const CombinedComponent = ({ onDrop }) => {
         {/* Render tableau stacks */}
         <div className='flex gap-5 justify-center pt-[10px]'>
           {tableau.map((stack, stackIndex) => (
+            <motion.div
+            key={stackIndex}
+            variants={item}
+            initial="hidden"
+            animate="visible"
+          >
             <div
               key={stackIndex}
               className='relative w-[80px] h-[100px] flex justify-center items-center border-4 border-cyan-800 text-center rounded-lg'
@@ -523,21 +549,34 @@ const CombinedComponent = ({ onDrop }) => {
               onDragOver={(e) => e.preventDefault()}
             >
               {stack.map((card, cardIndex) => (
-                <img
+                <motion.img
                   key={cardIndex}
                   src={card.isVisible ? card.image : CardBack}
                   alt={`Tableau Card ${stackIndex}-${cardIndex}`}
-                  className='cursor-pointer w-[100px] h-[150px] absolute'
+                  className='item cursor-pointer w-[100px] h-[150px] absolute'
+                  variants={item}
                   draggable={card.isVisible}
                   style={{
                     maxWidth: '100%',
                     maxHeight: '100%',
                     top: `${cardIndex * 22}px`,
+                    opacity: 0,
+                    y: 2,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: 0.2,
+                      delay: cardIndex * 0.05, // Add delay to stagger the animation
+                    },
                   }}
                   onDragStart={(e) => handleSingleCardDragStart(e, stackIndex, cardIndex)}
                 />
               ))}
             </div>
+            </motion.div>
+
           ))}
         </div>
       </div>
