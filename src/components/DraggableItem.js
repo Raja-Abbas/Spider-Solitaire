@@ -335,10 +335,27 @@ const CombinedComponent = ({ onDrop }) => {
   
       // Remove the last move(s) from the history
       setMovesHistory(movesHistory.slice(0, -movesToGoBack));
+  
+      // If cards were sent to the foundation in the last move, remove them from the foundation piles
+      if (cardsSentToFoundation) {
+        const updatedFoundation = [...foundation];
+        lastMove.before.forEach((stack, stackIndex) => {
+          if (stack.length > lastMove.after[stackIndex].length) {
+            // Cards were removed from this stack, indicating they were sent to the foundation
+            const removedCards = stack.slice(lastMove.after[stackIndex].length);
+            updatedFoundation.forEach((pile, pileIndex) => {
+              // Remove the cards from the foundation piles
+              updatedFoundation[pileIndex] = pile.filter(card => !removedCards.includes(card));
+            });
+          }
+        });
+        setFoundation(updatedFoundation);
+      }
     } else {
       console.log("No moves to undo.");
     }
   };
+  
   
   
   
