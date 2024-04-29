@@ -39,7 +39,7 @@ const App = () => {
 
   return (
     <div className='max-xl:hidden xl:mx-auto overflow-hidden border-black border relative w-[100%] flex justify-between h-screen xl:px-2'>
-      {/* {showRulesPopup && <SpiderSolitaireRulesPopup onClose={handleCloseRulesPopup} />} */}
+      {showRulesPopup && <SpiderSolitaireRulesPopup onClose={handleCloseRulesPopup} />}
       <DraggableItem onDrop={handleDrop} />
       <Timer/>
       <div className='shadow-2xl absolute p-3 bg-black rounded-lg bottom-10 right-5 flex flex-col gap-2'>

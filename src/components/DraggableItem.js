@@ -266,7 +266,6 @@ const CombinedComponent = ({ onDrop }) => {
     setMovesHistory([]);
     setFilledFoundations(0); // Reset the filled foundation piles count
   };
-
   const handleUndo = () => {
     // Check if there are moves in the history to undo
     if (movesHistory.length > 0) {
@@ -305,6 +304,8 @@ const CombinedComponent = ({ onDrop }) => {
       return 'tableau';
     }
   };
+  
+  
   
   
 
