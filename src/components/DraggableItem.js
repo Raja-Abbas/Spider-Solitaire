@@ -272,30 +272,26 @@ const CombinedComponent = ({ onDrop }) => {
       // Get the last recorded move from the history
       const lastMove = movesHistory[movesHistory.length - 1];
   
-      // Determine the type of the last move
-      const lastMoveType = getLastMoveType(lastMove);
+      // Check if the last move involved sending cards to the foundation
+      let cardsSentToFoundation = false;
+      for (let i = 0; i < lastMove.after.length; i++) {
+        const beforeLength = lastMove.before[i].length;
+        const afterLength = lastMove.after[i].length;
+        if (afterLength < beforeLength) {
+          // Cards were removed from this stack, indicating they were sent to the foundation
+          cardsSentToFoundation = true;
+          break;
+        }
+      }
   
-      // Adjust the number of moves to go back based on the move type
-      const movesToGoBack = lastMoveType === 'foundation' ? 2 : 1;
+      // Adjust the number of moves to go back based on whether cards were sent to the foundation
+      const movesToGoBack = cardsSentToFoundation ? 2 : 1;
   
       // Find the state before the specified number of moves
       let stateBeforeUndo = tableau;
       for (let i = 0; i < movesToGoBack; i++) {
         if (movesHistory.length > i) {
           stateBeforeUndo = movesHistory[movesHistory.length - 1 - i].before;
-        }
-      }
-  
-      // If the last move involved sending cards to the foundation
-      if (lastMoveType === 'foundation') {
-        // Check if any foundation pile contains a complete suit that wasn't there before the move
-        const newCompletedSuitIndex = lastMove.after.findIndex((pile, index) => pile.length === 13 && lastMove.before[index].length < 13);
-  
-        // If a completed suit is found, remove it from the foundation
-        if (newCompletedSuitIndex !== -1) {
-          const updatedFoundation = [...foundation];
-          updatedFoundation.splice(newCompletedSuitIndex, 1);
-          setFoundation(updatedFoundation);
         }
       }
   
@@ -308,6 +304,10 @@ const CombinedComponent = ({ onDrop }) => {
       console.log("No moves to undo.");
     }
   };
+  
+  
+  
+  
   
   
   
